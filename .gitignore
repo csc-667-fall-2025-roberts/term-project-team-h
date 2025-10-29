@@ -1,36 +1,3 @@
-# Node.js
 node_modules/
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-.pnp/
-.pnp.js
-.pnp.cjs
-
-# Editor/IDE specific files
-.vscode/
-.idea/
-*.sublime-project
-*.sublime-workspace
-
-# Environment variables
-.env
-.env.local
-.env.*.local
-
-# Build output
 dist/
-build/
-coverage/
-
-# Tests
-*.test.js
-*.spec.js
-
-# Logs
-logs/
-*.log
-
-# Miscellaneous
-tmp/
-.DS_Store
+.env
