@@ -1,3 +1,4 @@
-# term-project-team-h
+# Term Project - Team H
 
-Project README
+## Multiplayer UNO Game
+---
