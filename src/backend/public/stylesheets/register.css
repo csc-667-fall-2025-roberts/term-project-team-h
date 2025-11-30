@@ -1,0 +1,105 @@
+:root {
+    --bg_color_red: rgb(209, 45, 54);
+    --card_bg: #ffffff;
+    --text_dark: #222;
+    --btn_color: #000;
+    --btn_text: #fff;
+}
+
+body {
+    background-color: var(--bg_color_red);
+    height: 100vh;
+    margin: -20px;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+h1 {
+    margin: 0px;
+}
+
+.title {
+    font-size: 240px;
+    margin: 0px;
+    color:black;
+    text-decoration:none;
+}
+
+.register-container {
+    background: var(--card_bg);
+    width: 340px;
+    padding: 24px;
+    border-radius: 12px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.25);
+}
+
+.register-form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.register-form h2 {
+    margin: 0;
+    text-align: center;
+    color: var(--text_dark);
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.form-group label {
+    font-size: 14px;
+    color: var(--text_dark);
+}
+
+.form-group input {
+    padding: 10px;
+    font-size: 15px;
+    border: 1px solid #bbb;
+    border-radius: 6px;
+    outline: none;
+}
+
+.form-group input:focus {
+    border-color: #333;
+}
+
+button {
+    margin-top: 10px;
+    padding: 12px;
+    border: none;
+    border-radius: 6px;
+    background-color: var(--btn_color);
+    color: var(--btn_text);
+    font-size: 16px;
+    cursor: pointer;
+    transition: 0.2s ease;
+}
+
+button:hover {
+    opacity: 0.85;
+}
+
+.login-container {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+}
+
+p {
+    margin: 0;
+    margin-right: 5px;
+}
+
+.login-link {
+    color:black;
+    font-weight: bold;
+}
