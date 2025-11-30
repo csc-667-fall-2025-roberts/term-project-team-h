@@ -1,13 +1,5 @@
-:root {
-    --bg_color_red: rgb(209, 45, 54);
-    --card_bg: #ffffff;
-    --text_dark: #222;
-    --btn_color: #000;
-    --btn_text: #fff;
-}
-
 body {
-    background-color: var(--bg_color_red);
+    background-color: #D12D36;
     height: 100vh;
     margin: -20px;
 
@@ -29,7 +21,7 @@ h1 {
 }
 
 .login-container {
-    background: var(--card_bg);
+    background: #ffffff;
     width: 340px;
     padding: 24px;
     border-radius: 12px;
@@ -45,7 +37,7 @@ h1 {
 .login-form h2 {
     margin: 0;
     text-align: center;
-    color: var(--text_dark);
+    color: #222
 }
 
 .form-group {
@@ -56,7 +48,7 @@ h1 {
 
 .form-group label {
     font-size: 14px;
-    color: var(--text_dark);
+    color: #222;
 }
 
 .form-group input {
@@ -76,8 +68,8 @@ button {
     padding: 12px;
     border: none;
     border-radius: 6px;
-    background-color: var(--btn_color);
-    color: var(--btn_text);
+    background-color: #000;
+    color: #fff;
     font-size: 16px;
     cursor: pointer;
     transition: 0.2s ease;

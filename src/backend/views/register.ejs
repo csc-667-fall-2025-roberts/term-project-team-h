@@ -2,13 +2,13 @@
     <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>UNO Lobby</title>  
+        <title>Register</title>  
         <link rel="stylesheet" href="/stylesheets/register.css">
     </head>
     <body>
         <h1><a href="/" class="title">UNO</a></h1>
         <div class="register-container">
-            <form action="/register" method="POST" class="register-form">
+            <form action="/auth/register" method="POST" class="register-form">
                 <h2>Register</h2>
 
                 <div class="form-group">
@@ -45,7 +45,7 @@
             </form>
             <div class="login-container">
                 <p>Already have an account?</p>
-                <a class="login-link" href="/login">Login</a>
+                <a class="login-link" href="/auth/login">Login</a>
             </div>
         </div>
     </body>

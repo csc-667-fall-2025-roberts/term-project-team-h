@@ -1,9 +1,5 @@
-:root {
-  --bg-color: #D12D36;
-}
-
 body {
-    background-color: var(--bg-color);
+    background-color: #D12D36;
     height: 100vh;
     margin: -20px;
 
@@ -14,8 +10,12 @@ body {
 }
 
 h1 {
-    font-size: 240px;
-    margin-bottom: 20px;
+    font-size: 120px;
+    margin: 0;
+}
+h2 {
+    font-size: 100px;
+    margin: 0;
 }
 
 .btn {
@@ -32,7 +32,7 @@ h1 {
   font-family: inherit;
   font-weight: 500;
   color: black;
-  background-color: var(--bg-color);
+  background-color: var(--bg_color_red);
 }
 
 .btn:hover {
