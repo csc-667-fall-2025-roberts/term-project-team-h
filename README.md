@@ -1,7 +1,8 @@
 # Term Project - Team H
 
 ## Multiplayer UNO Game
-
+Contributors:
+- Ansh Khandelwal, Jose Pascua, Ajmal Wahab, Izzaldin Allawzi
 ---
 
 ## Getting Started
@@ -30,8 +31,12 @@ npm install
 1. **Install PostgreSQL**
 
 2. **Create a Database**
-   User pgAdmin4 UI or Terminal instructions below:
    ```bash
+   Two options to follow:
+   - pgAdmin4 UI
+   - Terminal
+
+   For terminal:
    # Connect to PostgreSQL
    psql -U postgres
    
@@ -60,8 +65,7 @@ npm install
      - `5432` with your PostgreSQL port (if different)
      - `uno_game` with your database name
 
-     ### Test Database Connection
-
+### Test Database Connection
 To verify that your database connection is working correctly:
 
 ```bash
