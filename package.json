@@ -30,6 +30,8 @@
   },
   "homepage": "https://github.com/csc-667-fall-2025-roberts/term-project-team-h#readme",
   "dependencies": {
+    "@types/bcrypt": "^6.0.0",
+    "bcrypt": "^6.0.0",
     "body-parser": "^2.2.0",
     "dotenv": "^17.2.3",
     "ejs": "^3.1.10",
