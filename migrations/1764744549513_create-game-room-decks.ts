@@ -3,7 +3,7 @@ import { MigrationBuilder } from "node-pg-migrate";
 export async function up(pgm: MigrationBuilder): Promise<void> {
   // game_room_decks
   pgm.createTable("game_room_decks", {
-    id: "id",
+    id: "id" as any,
     game_room_id: {
       type: "bigint",
       notNull: true,
@@ -22,12 +22,12 @@ export async function up(pgm: MigrationBuilder): Promise<void> {
       references: "game_room_players",
       onDelete: "CASCADE"
     },
-    position_index: "int"
+    position_index: "int" as any
   });
 
   // game_turns
   pgm.createTable("game_turns", {
-    id: "id",
+    id: "id" as any,
     game_room_id: {
       type: "bigint",
       notNull: true,
@@ -46,12 +46,12 @@ export async function up(pgm: MigrationBuilder): Promise<void> {
       onDelete: "SET NULL"
     },
     action_type: { type: "action_type_enum", notNull: true },
-    created_at: { type: "timestamp", default: pgm.func("current_timestamp") }
+    created_at: { type: "timestamp", default: pgm.func("current_timestamp") } as any
   });
 
   // game_results
   pgm.createTable("game_results", {
-    id: "id",
+    id: "id" as any,
     game_room_id: {
       type: "bigint",
       notNull: true,
@@ -63,13 +63,13 @@ export async function up(pgm: MigrationBuilder): Promise<void> {
       references: "users",
       onDelete: "SET NULL"
     },
-    total_turns: "int",
-    created_at: { type: "timestamp", default: pgm.func("current_timestamp") }
+    total_turns: "int" as any,
+    created_at: { type: "timestamp", default: pgm.func("current_timestamp") } as any
   });
 
   // game_result_players
   pgm.createTable("game_result_players", {
-    id: "id",
+    id: "id" as any,
     game_result_id: {
       type: "bigint",
       notNull: true,
@@ -83,7 +83,7 @@ export async function up(pgm: MigrationBuilder): Promise<void> {
       onDelete: "CASCADE"
     },
     rank: { type: "int", notNull: true },
-    cards_left: { type: "int", default: 0 }
+    cards_left: { type: "int", default: 0 } as any
   });
 }
 

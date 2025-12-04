@@ -2,7 +2,7 @@ import { MigrationBuilder } from "node-pg-migrate";
 
 export async function up(pgm: MigrationBuilder): Promise<void> {
   pgm.createTable("chat_messages", {
-    id: "id",
+    id: "id" as any,
     user_id: {
       type: "bigint",
       notNull: true,
@@ -15,7 +15,7 @@ export async function up(pgm: MigrationBuilder): Promise<void> {
       onDelete: "CASCADE"
     },
     message: { type: "text", notNull: true },
-    created_at: { type: "timestamp", default: pgm.func("current_timestamp") }
+    created_at: { type: "timestamp", default: pgm.func("current_timestamp") } as any
   });
 }
 
