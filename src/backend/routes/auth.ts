@@ -10,7 +10,7 @@ router.post("/login", (request, response) => {
     console.log(request.body.username);
     console.log(request.body.password);
 
-    response.render("login");
+    response.render("lobby");
 });
 
 router.get("/register", (_request, response) => {

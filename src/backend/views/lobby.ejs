@@ -1,14 +1,92 @@
-<html>
-    <head>
-        <meta charset="UTF-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>Login</title>  
-        <link rel="stylesheet" href="/stylesheets/lobby.css">
-    </head>
-    <body> 
-        <header>
-            <h1>Game Lobby</h1>
-            <a
-        </header>   
-    </body>
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Game Lobby</title>
+    <link rel="stylesheet" href="/stylesheets/lobby.css" />
+  </head>
+  <body>
+    <!-- HEADER -->
+    <header class="header">
+      <div class="header-title">
+        <h1>Game Lobby</h1>
+      </div>
+      <div class="header-user">
+        <span class="username">Username</span>
+        <a href="/" class="logout-btn">Log Out</a>
+      </div>
+    </header>
+
+    <!-- MAIN AREA -->
+    <main class="main">
+      <!-- LOBBY GRID -->
+      <section class="lobby-section">
+        <div class="lobby-grid">
+          <!-- Repeat this card per lobby (in EJS you’d loop) -->
+          <article class="lobby-card">
+            <div class="lobby-card-top">
+              <span class="lobby-name">[ Username ]'s Lobby</span>
+              <span class="lobby-count">1/4</span>
+            </div>
+            <button class="join-btn">Join</button>
+          </article>
+
+          <article class="lobby-card">
+            <div class="lobby-card-top">
+              <span class="lobby-name">[ Username ]'s Lobby</span>
+              <span class="lobby-count">2/4</span>
+            </div>
+            <button class="join-btn">Join</button>
+          </article>
+
+          <article class="lobby-card">
+            <div class="lobby-card-top">
+              <span class="lobby-name">[ Username ]'s Lobby</span>
+              <span class="lobby-count">3/4</span>
+            </div>
+            <button class="join-btn">Join</button>
+          </article>
+
+          <article class="lobby-card">
+            <div class="lobby-card-top">
+              <span class="lobby-name">[ Username ]'s Lobby</span>
+              <span class="lobby-count">4/4</span>
+            </div>
+            <button class="join-btn" disabled>Full</button>
+          </article>
+        </div>
+
+        <div class="create-room-wrapper">
+          <button class="create-room-btn">Create Room</button>
+        </div>
+      </section>
+
+      <!-- CHAT PANEL -->
+      <aside class="chat-section">
+        <div class="chat-header">Lobby Chat</div>
+
+        <div class="chat-messages">
+          <div class="message">
+            <span class="message-user">Alice:</span>
+            <span class="message-text">Anyone up for a quick game?</span>
+          </div>
+          <div class="message">
+            <span class="message-user">Bob:</span>
+            <span class="message-text">Give me 2 minutes!</span>
+          </div>
+        </div>
+
+        <form class="chat-input" action="#" method="POST">
+          <input
+            type="text"
+            name="message"
+            placeholder="Type a message..."
+            autocomplete="off"
+          />
+          <button type="submit">Send</button>
+        </form>
+      </aside>
+    </main>
+  </body>
 </html>

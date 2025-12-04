@@ -29,7 +29,6 @@ h1 {
   border-radius: 6em;
   transition: all 0.2s;
   border: none;
-  font-family: inherit;
   font-weight: 500;
   color: black;
   background-color: var(--bg-color);
