@@ -14,8 +14,8 @@
     "dev": "concurrently --names \"backend,frontend,live\" --prefix-colors \"green,blue,magenta\" \"npm run dev:backend\" \"npm run dev:frontend\" \"npm run dev:live\"",
     "start:dev": "npm run dev",
     "migrate:create": "node-pg-migrate create -j ts -- ",
-    "migrate:up": "node-pg-migrate up",
-    "migrate:down": "node-pg-migrate down"
+    "migrate:up": "cross-env NODE_OPTIONS=\"--import tsx\" node-pg-migrate up",
+    "migrate:down": "cross-env NODE_OPTIONS=\"--import tsx\" node-pg-migrate down"
   },
   "repository": {
     "type": "git",
@@ -48,6 +48,7 @@
     "@typescript-eslint/parser": "^8.46.0",
     "browser-sync": "^3.0.4",
     "concurrently": "^9.2.1",
+    "cross-env": "^10.1.0",
     "esbuild": "^0.25.10",
     "eslint": "^9.37.0",
     "eslint-config-prettier": "^10.1.8",
@@ -59,6 +60,7 @@
     "prettier-plugin-ejs": "^1.0.3",
     "prettier-plugin-organize-imports": "^4.3.0",
     "ts-node": "^10.9.2",
+    "tsx": "^4.21.0",
     "typescript": "^5.9.2"
   }
 }
