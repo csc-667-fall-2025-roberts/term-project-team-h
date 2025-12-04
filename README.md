@@ -30,6 +30,7 @@ npm install
 1. **Install PostgreSQL**
 
 2. **Create a Database**
+   User pgAdmin4 UI or Terminal instructions below:
    ```bash
    # Connect to PostgreSQL
    psql -U postgres
@@ -41,8 +42,8 @@ npm install
    \q
    ```
 
-3. **Configure Environment Variables**
-   - Copy the example environment file into a `.env` file:
+4. **Configure Environment Variables**
+   - Copy the example environment file into a `.env` file into the root:
      ```bash
      touch .env
      ```
