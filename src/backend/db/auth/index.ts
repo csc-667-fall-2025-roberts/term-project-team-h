@@ -1,9 +1,5 @@
 /**
  * Authentication and user database operations
- * 
- * This module provides functions for user management and authentication.
- * It follows a pattern where SQL queries are separated in sql.ts and
- * business logic functions are defined here.
  */
 
 import db from "../connection";

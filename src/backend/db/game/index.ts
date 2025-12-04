@@ -1,9 +1,5 @@
 /**
  * Game database operations
- * 
- * This module provides functions for managing game rooms, players, cards, decks, turns, and results.
- * It follows a pattern where SQL queries are separated in sql.ts and
- * business logic functions are defined here.
  */
 
 import db from "../connection";

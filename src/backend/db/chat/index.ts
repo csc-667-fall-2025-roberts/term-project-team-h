@@ -1,9 +1,5 @@
 /**
  * Chat database operations
- * 
- * This module provides functions for managing chat messages.
- * It follows a pattern where SQL queries are separated in sql.ts and
- * business logic functions are defined here.
  */
 
 import db from "../connection";
