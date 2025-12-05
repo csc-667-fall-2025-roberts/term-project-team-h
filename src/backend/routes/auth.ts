@@ -7,10 +7,12 @@ router.get("/login", (_request, response) => {
 });
 
 router.post("/login", (request, response) => {
-    console.log(request.body.username);
-    console.log(request.body.password);
-
     response.render("lobby");
+
+    //console.log(request.body.username);
+    //console.log(request.body.password);
+
+    //response.render("lobby");
 });
 
 router.get("/register", (_request, response) => {

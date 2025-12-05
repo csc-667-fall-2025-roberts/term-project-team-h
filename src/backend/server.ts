@@ -24,14 +24,6 @@ app.get("/", (_request, response) => {
   response.render("root");
 });
 
-app.use((_request, response, next) => {
-  next(response.render("HTTPError", { error: "Page Not Found"}));
-});
-
-app.listen(PORT, () => {
-  console.log(`Server started on port ${PORT}`);
-});
-
 app.get("/lobby/create_room", (_request, response) => {
   response.render("create_room");
 });
@@ -39,4 +31,12 @@ app.get("/lobby/create_room", (_request, response) => {
 app.get("/games/:id", (request, response) => {
   const { id } = request.params;
   response.render("game", { gameId: id });
+});
+
+app.use((_request, response, next) => {
+  next(response.render("HTTPError", { error: "Page Not Found"}));
+});
+
+app.listen(PORT, () => {
+  console.log(`Server started on port ${PORT}`);
 });
