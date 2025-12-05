@@ -1,12 +1,12 @@
 body {
-    background-color: #D12D36;
     height: 100vh;
-    margin: -20px;
 
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
+
+    background: linear-gradient(to bottom, #D12D36 0%, #8A181D 100%);
 }
 
 h1 {
