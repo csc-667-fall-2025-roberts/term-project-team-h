@@ -15,7 +15,8 @@
     "start:dev": "npm run dev",
     "migrate:create": "node-pg-migrate create -j ts -- ",
     "migrate:up": "cross-env NODE_OPTIONS=\"--import tsx\" node-pg-migrate up",
-    "migrate:down": "cross-env NODE_OPTIONS=\"--import tsx\" node-pg-migrate down"
+    "migrate:down": "cross-env NODE_OPTIONS=\"--import tsx\" node-pg-migrate down",
+    "test:db": "npx ts-node src/backend/test-db.ts"
   },
   "repository": {
     "type": "git",
