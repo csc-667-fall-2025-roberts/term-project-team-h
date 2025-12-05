@@ -1,0 +1,57 @@
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Create A Room</title>
+    <link rel="stylesheet" href="/stylesheets/create-room.css" />
+  </head>
+  <body>
+    <div class="page">
+      <header class="page-header">
+        <h1>Create A Room</h1>
+      </header>
+
+      <main class="layout">
+        <section class="column">
+          <div class="section-label">Max Players</div>
+          <div class="max-player-buttons">
+            <button class="pill-button">2 Players</button>
+            <button class="pill-button">3 Players</button>
+            <button class="pill-button">4 Players</button>
+          </div>
+          <p class="helper-text">
+            Click to set the maximum number of players in the lobby.
+          </p>
+        </section>
+
+        <section class="column">
+          <h2 class="section-title">Players in Lobby</h2>
+          <div class="players-card">
+            <ul class="player-list">
+              <li>[ Player Username ]</li>
+              <li>[ Player Username ]</li>
+              <li>[ Player Username ]</li>
+              <li>[ Player Username ]</li>
+            </ul>
+          </div>
+        </section>
+
+        <section class="column">
+          <button class="primary-button wide-button">Set Room Password</button>
+          <button class="secondary-button wide-button">Invite Player</button>
+        </section>
+      </main>
+
+      <footer class="page-footer">
+        <div class="start-wrapper">
+          <p class="helper-text helper-inline">
+            Click to navigate to the game room.
+          </p>
+          <a href="/games/1" class="primary-button start-button">
+            Start Game
+          </a>
+        </div>
+      </footer>
+    </div>
+  </body>
+</html>

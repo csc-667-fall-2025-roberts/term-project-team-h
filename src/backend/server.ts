@@ -31,3 +31,12 @@ app.use((_request, response, next) => {
 app.listen(PORT, () => {
   console.log(`Server started on port ${PORT}`);
 });
+
+app.get("/lobby/create_room", (_request, response) => {
+  response.render("create_room");
+});
+
+app.get("/games/:id", (request, response) => {
+  const { id } = request.params;
+  response.render("game", { gameId: id });
+});

@@ -216,3 +216,9 @@ body {
 .chat-input button:hover {
   opacity: 0.85;
 }
+
+.join-btn,
+.create-room-btn {
+  text-decoration: none;
+  color: inherit;
+}
