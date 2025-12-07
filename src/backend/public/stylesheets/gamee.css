@@ -1,0 +1,100 @@
+@font-face {
+  font-family: 'BarberShop'; 
+  src: url('../fonts/BarberChop.otf');
+}
+
+:root {
+  --bg-color: #D12D36;
+}
+
+body {
+    height: 100vh;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background: radial-gradient(circle, var(--bg-color) 0%, black 100%);
+}
+
+
+
+/* Player Boxes */
+.player {
+  position: absolute;
+  padding: 10px;
+}
+
+/* Player positions */
+.player-top {
+  top: 5%;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.player-bottom {
+  bottom: 5%;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.player-left {
+  left: 5%;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+}
+
+.player-right {
+  right: 5%;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+}
+
+/* Center Box */
+.center-box {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 300px;
+  height: 150px;
+  transform: translate(-60%, -50%);
+  display: flex;
+  align-items: center;
+  gap: 60px;
+  padding: 20px;
+}
+
+/* Piles */
+.card {
+  height: 220px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.top-player-card {
+    height: 100px;
+    rotate: 180deg;
+    margin: 0px -15px;
+}
+
+.left-player-card {
+    height: 100px;
+    rotate: 90deg;
+    margin: -25px 0px;
+}
+
+.right-player-card {
+    height: 100px;
+    rotate: 270deg;
+    margin: -25px 0px;
+}
+
+.bottom-player-card {
+    height: 100px;
+    margin: 0px -10px;
+}

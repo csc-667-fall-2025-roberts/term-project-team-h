@@ -24,13 +24,17 @@ app.get("/", (_request, response) => {
   response.render("root");
 });
 
-app.get("/lobby/create_room", (_request, response) => {
-  response.render("create_room");
+app.get("/lobby/waiting_room", (_request, response) => {
+  response.render("waiting_room");
 });
 
 app.get("/games/:id", (request, response) => {
   const { id } = request.params;
-  response.render("game", { gameId: id });
+  response.render("gamee", { gameId: id });
+});
+
+app.get("/og", (request, response) => {
+  response.render("game");
 });
 
 app.use((_request, response, next) => {
