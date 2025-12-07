@@ -2,6 +2,7 @@
  * Authentication and user database operations
  */
 
+import bcrypt from "bcrypt";
 import db from "../connection";
 import { userQueries } from "./sql";
 
@@ -88,5 +89,65 @@ export async function deleteUser(id: number): Promise<boolean> {
 export async function listUsers(): Promise<Omit<User, "password">[]> {
   const users = await db.manyOrNone<Omit<User, "password">>(userQueries.list);
   return users || [];
+}
+
+/**
+ * Sign up a new user
+ */
+export async function signup(
+  username: string,
+  email: string,
+  password: string
+): Promise<Omit<User, "password">> {
+
+  const existingUser = await findUserByUsername(username);
+  if (existingUser) {
+    throw new Error("Username already exists");
+  }
+
+
+  const existingEmail = await findUserByEmail(email);
+  if (existingEmail) {
+    throw new Error("Email already exists");
+  }
+
+
+  const hashedPassword = await bcrypt.hash(password, 10);
+
+
+  const user = await createUser({
+    username,
+    email,
+    password: hashedPassword,
+  });
+
+  return user;
+}
+
+/**
+ * Log in a user
+ */
+export async function login(
+  username: string,
+  password: string
+): Promise<Omit<User, "password">> {
+
+  const user = await findUserByUsername(username);
+  if (!user) {
+    throw new Error("Invalid username or password");
+  }
+
+
+  const passwordMatch = await bcrypt.compare(password, user.password);
+  if (!passwordMatch) {
+    throw new Error("Invalid username or password");
+  }
+
+  return {
+    id: user.id,
+    username: user.username,
+    email: user.email,
+    created_at: user.created_at,
+  };
 }
 

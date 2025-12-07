@@ -3,6 +3,8 @@ import express from "express";
 import morgan from "morgan";
 import createHttpError from "http-errors";
 
+import { sessionMiddleware } from "./config/session";
+import { requireUser } from "./middleware";
 import { lobbyRoutes } from "./routes/lobby";
 import { authRoutes } from "./routes/auth";
 
@@ -17,18 +19,16 @@ app.use(express.json());
 app.set("views", path.join(__dirname, "views"));
 app.set("view engine", "ejs");
 
-app.use("/lobby", lobbyRoutes);
+app.use(sessionMiddleware);
+
+app.use("/lobby", requireUser, lobbyRoutes);
 app.use("/auth", authRoutes);
 
 app.get("/", (_request, response) => {
   response.render("root");
 });
 
-app.get("/lobby/create_room", (_request, response) => {
-  response.render("create_room");
-});
-
-app.get("/games/:id", (request, response) => {
+app.get("/games/:id", requireUser, (request, response) => {
   const { id } = request.params;
   response.render("game", { gameId: id });
 });

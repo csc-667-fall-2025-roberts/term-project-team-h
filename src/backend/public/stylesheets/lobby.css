@@ -64,6 +64,12 @@ body {
   font-weight: 550;
   cursor: pointer;
   transition: all 0.2s;
+  font-family: inherit;
+}
+
+.logout-btn:hover {
+  background: var(--border);
+  color: #fff;
 }
 
 .logout-btn:hover {

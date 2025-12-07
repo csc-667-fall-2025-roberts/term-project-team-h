@@ -14,7 +14,9 @@
       </div>
       <div class="header-user">
         <span class="username">Username</span>
-        <a href="/" class="logout-btn">Log Out</a>
+        <form action="/auth/logout" method="POST" style="display: inline;">
+          <button type="submit" class="logout-btn">Log Out</button>
+        </form>
       </div>
     </header>
 
