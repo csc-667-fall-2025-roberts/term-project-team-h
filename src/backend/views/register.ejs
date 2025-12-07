@@ -11,12 +11,28 @@
             <form action="/auth/register" method="POST" class="register-form">
                 <h2>Register</h2>
 
+                <% if (typeof error !== 'undefined' && error) { %>
+                    <div class="error-message" style="color: red; margin-bottom: 1rem;">
+                        <%= error %>
+                    </div>
+                <% } %>
+
                 <div class="form-group">
                 <label for="username">Username</label>
                 <input
                     type="text"
                     id="username"
                     name="username"
+                    required
+                />
+                </div>
+
+                <div class="form-group">
+                <label for="email">Email</label>
+                <input
+                    type="email"
+                    id="email"
+                    name="email"
                     required
                 />
                 </div>
@@ -37,16 +53,6 @@
                     type="password"
                     id="password"
                     name="password"
-                    required
-                />
-                </div>
-
-                <div class="form-group">
-                <label for="password">Copy Password</label>
-                <input
-                    type="password"
-                    id="copy-password"
-                    name="copy-password"
                     required
                 />
                 </div>
