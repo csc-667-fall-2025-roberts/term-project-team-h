@@ -13,58 +13,65 @@
         <h1>Game Lobby</h1>
       </div>
       <div class="header-user">
-        <span class="username">Username</span>
+        <span class="username">
+          <% if (currentUser) { %>
+            <%= currentUser.username %>
+          <% } else { %>
+            Guest
+          <% } %>
+        </span>
         <form action="/auth/logout" method="POST" style="display: inline;">
           <button type="submit" class="logout-btn">Log Out</button>
         </form>
       </div>
     </header>
 
-    <!-- MAIN AREA -->
     <main class="main">
       <!-- LOBBY GRID -->
       <section class="lobby-section">
         <div class="lobby-grid">
-          <!-- Repeat this card per lobby (in EJS you’d loop) -->
-          <article class="lobby-card">
-            <div class="lobby-card-top">
-              <span class="lobby-name">[ Username ]'s Lobby</span>
-              <span class="lobby-count">1/4</span>
-            </div>
-            <a href="/games/1" class="join-btn">Join</a>
-          </article>
+          <% if (!rooms || rooms.length === 0) { %>
+            <p class="empty-lobby">No games yet. Create one!</p>
+          <% } else { %>
+            <% rooms.forEach(function (room) { %>
+              <article class="lobby-card">
+                <div class="lobby-card-top">
+                  <span class="lobby-name">
+                    <%= room.hostUsername %>'s Lobby
+                  </span>
+                  <span class="lobby-count">
+                    <%= room.currentPlayers %>/<%= room.maxPlayers %>
+                  </span>
+                </div>
 
-          <article class="lobby-card">
-            <div class="lobby-card-top">
-              <span class="lobby-name">[ Username ]'s Lobby</span>
-              <span class="lobby-count">2/4</span>
-            </div>
-            <a href="/games/1" class="join-btn">Join</a>
-          </article>
-
-          <article class="lobby-card">
-            <div class="lobby-card-top">
-              <span class="lobby-name">[ Username ]'s Lobby</span>
-              <span class="lobby-count">3/4</span>
-            </div>
-            <a href="/games/1" class="join-btn">Join</a>
-          </article>
-
-          <article class="lobby-card">
-            <div class="lobby-card-top">
-              <span class="lobby-name">[ Username ]'s Lobby</span>
-              <span class="lobby-count">4/4</span>
-            </div>
-            <button class="join-btn" disabled>Full</button>
-          </article>
+                <div class="lobby-card-bottom">
+                  <% if (room.currentPlayers >= room.maxPlayers) { %>
+                    <button class="join-btn" disabled>Full</button>
+                  <% } else { %>
+                    <form
+                      action="/waiting_room/<%= room.id %>/join"
+                      method="POST"
+                    >
+                      <% if (room.hasPassword) { %>
+                        <button type="submit" class="join-btn">Join 🔒</button>
+                      <% } else { %>
+                        <button type="submit" class="join-btn">Join</button>
+                      <% } %>
+                    </form>
+                  <% } %>
+                </div>
+              </article>
+            <% }) %>
+          <% } %>
         </div>
 
         <div class="create-room-wrapper">
-          <a href="/lobby/waiting_room" class="create-room-btn">Create Room</a>
+          <!-- This just opens the modal, form submission is handled inside -->
+          <button class="create-room-btn" type="button">Create Room</button>
         </div>
       </section>
 
-      <!-- CHAT PANEL -->
+      <!-- CHAT PANEL (still static / placeholder for now) -->
       <aside class="chat-section">
         <div class="chat-header">Lobby Chat</div>
 
@@ -91,64 +98,111 @@
       </aside>
     </main>
 
+    <!-- CREATE ROOM MODAL -->
     <div id="create-room-modal" class="create-room-modal hidden">
-      <div class="page">
-          <header class="page-header">
-            <h1>Create A Room</h1>
-          </header>
+      <form action="/lobby/create_game" method="POST" class="page">
+        <header class="page-header">
+          <h1>Create A Room</h1>
+        </header>
 
-          <main class="layout">
-            <section class="column">
-              <div class="section-label">Max Players</div>
-              <div class="max-player-buttons">
-                <button class="pill-button">2 Players</button>
-                <button class="pill-button">3 Players</button>
-                <button class="pill-button">4 Players</button>
-              </div>
-            </section>
-
-            <section class="column">
-              <h2 class="section-title">Players in Lobby</h2>
-              <div class="players-card">
-                <ul class="player-list">
-                  <li>[ Player Username ]</li>
-                  <li>[ Player Username ]</li>
-                  <li>[ Player Username ]</li>
-                  <li>[ Player Username ]</li>
-                </ul>
-              </div>
-            </section>
-
-            <section class="column">
-              <button class="primary-button wide-button">Set Room Password</button>
-              <button class="secondary-button wide-button">Invite Player</button>
-            </section>
-          </main>
-
-          <footer class="page-footer">
-            <div class="start-wrapper">
-              <a href="/lobby/waiting_room" class="primary-button start-button">Create Room</a>
-              <button id="close-modal" class="secondary-button start-button">Cancel</button>
+        <main class="layout">
+          <section class="column">
+            <div class="section-label">Max Players</div>
+            <div class="max-player-buttons">
+              <button class="pill-button active" data-max="2" type="button">
+                2 Players
+              </button>
+              <button class="pill-button" data-max="3" type="button">
+                3 Players
+              </button>
+              <button class="pill-button" data-max="4" type="button">
+                4 Players
+              </button>
             </div>
-          </footer>
-      </div>
+          </section>
+
+          <section class="column">
+            <div class="section-label">Password</div>
+            <button
+              class="primary-button wide-button"
+              type="button"
+              id="set-room-password"
+            >
+              Set Room Password
+            </button>
+          </section>
+        </main>
+
+        <!-- hidden fields sent to /waiting_room -->
+        <input type="hidden" name="title" value="">
+        <input type="hidden" name="maxPlayers" id="maxPlayersInput" value="2">
+        <input type="hidden" name="password" id="roomPasswordInput" value="">
+
+        <footer class="page-footer">
+          <div class="start-wrapper">
+            <button type="submit" class="primary-button start-button">
+              Create Room
+            </button>
+            <button
+              id="close-modal"
+              type="button"
+              class="secondary-button start-button"
+            >
+              Cancel
+            </button>
+          </div>
+        </footer>
+      </form>
     </div>
 
-    <!-- Script to change class for create room -->
+    <!-- Script to toggle create room modal + set fields -->
     <script>
-      const openBtn = document.querySelector('.create-room-btn');
-      const modal = document.getElementById('create-room-modal');
-      const closeBtn = document.getElementById('close-modal');
+      const openBtn = document.querySelector(".create-room-btn");
+      const modal = document.getElementById("create-room-modal");
+      const closeBtn = document.getElementById("close-modal");
 
-      openBtn.addEventListener('click', (e) => {
-        e.preventDefault();       // prevent navigating away
-        modal.classList.remove('hidden');
+      if (openBtn && modal && closeBtn) {
+        openBtn.addEventListener("click", (e) => {
+          e.preventDefault();
+          modal.classList.remove("hidden");
+        });
+
+        closeBtn.addEventListener("click", () => {
+          modal.classList.add("hidden");
+        });
+      }
+
+      // max players pills
+      const pillButtons = document.querySelectorAll(".pill-button");
+      const maxPlayersInput = document.getElementById("maxPlayersInput");
+
+      pillButtons.forEach((btn) => {
+        btn.addEventListener("click", (e) => {
+          e.preventDefault();
+          pillButtons.forEach((b) => b.classList.remove("active"));
+          btn.classList.add("active");
+          const max = btn.dataset.max;
+          if (maxPlayersInput && max) {
+            maxPlayersInput.value = max;
+          }
+        });
       });
 
-      closeBtn.addEventListener('click', () => {
-        modal.classList.add('hidden');
-      });
+      // password setter
+      const passwordBtn = document.getElementById("set-room-password");
+      const passwordInput = document.getElementById("roomPasswordInput");
+
+      if (passwordBtn && passwordInput) {
+        passwordBtn.addEventListener("click", (e) => {
+          e.preventDefault();
+          const value = window.prompt(
+            "Enter a room password (leave blank for none):",
+            passwordInput.value || ""
+          );
+          if (value === null) return; // user cancelled
+          passwordInput.value = value.trim();
+        });
+      }
     </script>
-
   </body>
 </html>

@@ -23,7 +23,6 @@ router.post("/login", requireGuest, async (request, response) => {
 
     response.redirect("/lobby");
   } catch (error: any) {
-
     response.render("login", { error: error.message });
   }
 });

@@ -1,161 +1,175 @@
 @font-face {
-    font-family: 'BarberShop'; 
-    src: url('../fonts/BarberChop.otf');
+  font-family: "BarberShop";
+  src: url("../fonts/BarberChop.otf");
 }
 
 :root {
-  --bg: #D12D36;
+  --bg: #d12d36;
   --border: #222;
   --card-bg: #ffffff;
   --text: #111;
 }
 
-body {
-    font-family: BarberShop;
-    margin: 0;
-    min-height: 100vh;
-    background: var(--bg);
+/* PAGE LAYOUT */
 
-    display: flex;
-    flex-direction: column;
-    background: linear-gradient(to bottom, #D12D36 0%, #8A181D 100%);
+body {
+  font-family: BarberShop;
+  margin: 0;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: linear-gradient(to bottom, #d12d36 0%, #8a181d 100%);
 }
 
 /* HEADER */
 
 .header {
-    position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    padding: 12px 24px;
-    border-bottom: 2px solid var(--border);
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 24px;
+  border-bottom: 2px solid var(--border);
 }
 
 .header-title h1 {
-    margin: 0;
-    font-size: 40px;
-    font-weight: 600;
-    color: whitesmoke;
-
-    text-shadow:
-        3px 4px 0px black;
-    text-decoration: none;
+  margin: 0;
+  font-size: 40px;
+  font-weight: 600;
+  color: whitesmoke;
+  text-shadow: 3px 4px 0px black;
 }
 
 /* username + logout pinned to right */
 .header-user {
-    position: absolute;
-    right: 24px;
-
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    font-size: 14px;
+  position: absolute;
+  right: 24px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 14px;
 }
 
 .username {
-    font-size: 18px;
-    margin-top: 5px;
+  font-size: 18px;
+  margin-top: 5px;
 }
 
 .logout-btn {
-    display: inline-flex;
-    justify-content: center;
-    align-items: center;
-
-    padding: 6px 14px;
-    border-radius: 45px;
-    border: 2px solid var(--border);
-    background: #fff;
-    color: var(--text);
-    text-decoration: none;
-    font-size: 0.9rem;
-    font-weight: 550;
-    cursor: pointer;
-    transition: all 0.2s;
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  padding: 6px 14px;
+  border-radius: 45px;
+  border: 2px solid var(--border);
+  background: #fff;
+  color: var(--text);
+  text-decoration: none;
+  font-size: 0.9rem;
+  font-weight: 550;
+  cursor: pointer;
+  transition: all 0.2s;
 }
 
 .logout-btn:hover {
-    background: var(--border);
-    color: #fff;
+  background: var(--border);
+  color: #fff;
 }
+
+/* MAIN LAYOUT */
 
 .main {
-    flex: 1;
-    display: flex;
-    gap: 24px;
-    padding: 24px;
+  flex: 1;
+  display: flex;
+  gap: 24px;
+  padding: 24px;
 }
 
+/* LOBBY */
+
 .lobby-section {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    gap: 24px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
 }
 
 .lobby-grid {
-    display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 20px;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 20px;
+}
+
+.empty-lobby {
+  grid-column: 1 / -1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 2.8rem;
+  padding: 40px 0;
+  color: #fff;
+  text-shadow: 4px 4px 0 black;
 }
 
 .lobby-card {
-    background: var(--card-bg);
-    border: 2px solid var(--border);
-    border-radius: 4px;
-    padding: 12px;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    min-height: 120px;
+  background: var(--card-bg);
+  border: 2px solid var(--border);
+  border-radius: 4px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 120px;
 }
 
 .lobby-card-top {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    margin-bottom: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 12px;
+}
+
+.lobby-card-bottom {
+  display: flex;
+  justify-content: center;
+  margin-top: auto;
 }
 
 .lobby-name {
-    font-size: 0.95rem;
+  font-size: 1.35rem;
 }
 
 .lobby-count {
-    font-size: 0.8rem;
+  font-size: 1.1rem;
 }
 
 .join-btn {
-    display: flex; 
-    align-self: stretch;
-    justify-content: center;
-    padding: 8px 0;
-    border-radius: 0;
-    border: 2px solid var(--border);
-    background: #fff;
-    cursor: pointer;
-    transition: all 0.2s;
-    font-size: 0.95rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 16px;
+  border-radius: 4px;
+  border: 2px solid var(--border);
+  background: #fff;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 0.95rem;
 }
 
 .join-btn:hover:not(:disabled) {
-    background: var(--border);
-    color: #fff;
+  background: var(--border);
+  color: #fff;
 }
 
 .join-btn:disabled {
-    font-family: BarberShop;
-    opacity: 0.5;
-    cursor: default;
+  opacity: 0.5;
+  cursor: default;
 }
 
 .create-room-wrapper {
-    margin-top: auto;
-    display: flex;
-    justify-content: flex-start;
+  margin-top: auto;
+  display: flex;
+  justify-content: flex-start;
 }
 
 .create-room-btn {
@@ -172,7 +186,9 @@ body {
 .create-room-btn:hover {
   background: var(--border);
   color: #fff;
-} 
+}
+
+/* CHAT PANEL */
 
 .chat-section {
   flex: 0 0 320px;
@@ -240,35 +256,17 @@ body {
   color: inherit;
 }
 
-.create-room-modal {
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.55);   
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 999;                   
-}
+/* CREATE ROOM MODAL */
 
-/* CREATE ROOM */
-
-/* CREATE ROOM MODAL ROOT VARIABLES */
 .create-room-modal {
-  --bg-color: #d12d36;
-  --card-bg: #ffffff;
   --border-color: #222;
-  --text-color: #111;
   --muted-text: #555;
   --accent: #000000;
   --shadow-soft: 0 6px 20px rgba(0, 0, 0, 0.2);
-  --font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-}
 
-/* Entire modal container */
-.create-room-modal {
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,0.55);
+  background: rgba(0, 0, 0, 0.55);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -308,7 +306,7 @@ body {
 /* Grid Layout */
 .create-room-modal .layout {
   display: grid;
-  grid-template-columns: 1.1fr 1.4fr 1.1fr;
+  grid-template-columns: 1fr 1fr;
   gap: 32px;
 }
 
@@ -326,7 +324,7 @@ body {
   margin-bottom: 12px;
 }
 
-/* Buttons */
+/* Max-player buttons */
 .create-room-modal .max-player-buttons {
   display: flex;
   flex-direction: column;
@@ -349,30 +347,6 @@ body {
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
 }
 
-/* Players card */
-.create-room-modal .players-card {
-  border: 2px solid var(--border-color);
-  border-radius: 4px;
-  padding: 16px 20px;
-  min-height: 200px;
-}
-
-.create-room-modal .player-list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-.create-room-modal .player-list li {
-  padding: 6px 0;
-  border-bottom: 1px solid #ddd;
-  font-size: 14px;
-}
-
-.create-room-modal .player-list li:last-child {
-  border-bottom: none;
-}
-
 /* Footer */
 .create-room-modal .page-footer {
   margin-top: 32px;
@@ -386,7 +360,7 @@ body {
   gap: 12px;
 }
 
-/* Buttons */
+/* Modal buttons */
 .create-room-modal .primary-button,
 .create-room-modal .secondary-button {
   display: inline-flex;
