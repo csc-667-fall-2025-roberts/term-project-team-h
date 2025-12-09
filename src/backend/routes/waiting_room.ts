@@ -37,7 +37,7 @@ router.get("/:id", async (req, res, next) => {
     }
 
     const players = await getWaitingRoomPlayers(roomId);
-    const me = players.find((p) => p.userId === userId);
+    const me = players.find((p) => Number(p.userId) === userId);
     const isGameMaster = !!me && me.isGameMaster;
 
     return res.render("waiting_room", {

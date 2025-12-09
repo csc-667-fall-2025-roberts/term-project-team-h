@@ -16,24 +16,35 @@
                 <img src="/images/cards/Deck.png" class = "top-player-card">
                 <img src="/images/cards/Deck.png" class = "top-player-card">
                 <img src="/images/cards/Deck.png" class = "top-player-card">
+                <img src="/images/cards/Deck.png" class = "top-player-card">
+                <img src="/images/cards/Deck.png" class = "top-player-card">
+                <img src="/images/cards/Deck.png" class = "top-player-card">
+                <img src="/images/cards/Deck.png" class = "top-player-card">
+                <h2 class="player-name">Player Username</h2>
+                <h4 class="card-count">Card Count : 11</h4>
             </div>
 
             <div class="player player-left">
-                <img src="/images/cards/Deck.png" class = "left-player-card">
-                <img src="/images/cards/Deck.png" class = "left-player-card">
-                <img src="/images/cards/Deck.png" class = "left-player-card">
-                <img src="/images/cards/Deck.png" class = "left-player-card">
+                <h2 class="player-name">Player Username</h2>
+                <h4 class="card-count">Card Count : 3</h4>
                 <img src="/images/cards/Deck.png" class = "left-player-card">
                 <img src="/images/cards/Deck.png" class = "left-player-card">
                 <img src="/images/cards/Deck.png" class = "left-player-card">
             </div>
 
             <div class="center-box">
-                <img src="/images/cards/Deck.png" class="card card-1">
+                <div class="draw-card">
+                    <h4 class="draw-text">Draw Card</h4>
+                    <a class="draw">
+                        <img src="/images/cards/Deck.png" class="card card-1">
+                    </a>
+                </div>
                 <img src="/images/cards/Red_7.png" class="card card-2">
             </div>
 
             <div class="player player-right">
+                <h2 class="player-name">Player Username</h2>
+                <h4 class="card-count">Card Count : 7</h4>
                 <img src="/images/cards/Deck.png" class = "right-player-card">
                 <img src="/images/cards/Deck.png" class = "right-player-card">
                 <img src="/images/cards/Deck.png" class = "right-player-card">
@@ -44,16 +55,87 @@
             </div>
 
             <div class="player player-bottom">
-                <img src="/images/cards/Red_1.png" class = "bottom-player-card">
+                <h2 class="player-name">Player Username</h2>
+                <h4 class="card-count">Card Count : 7</h4>
+                <a class="player-card">
+                    <img src="/images/cards/Red_1.png" class = "bottom-player-card">
+                </a>
+                <a class="player-card">
                 <img src="/images/cards/Red_4.png" class = "bottom-player-card">
+                </a>
+                <a class="player-card">
                 <img src="/images/cards/Wild.png" class = "bottom-player-card">
-                <img src="/images/cards/Blue_Draw.png" class = "bottom-player-card">
-                <img src="/images/cards/Blue_8.png" class = "bottom-player-card">
-                <img src="/images/cards/Yellow_Skip.png" class = "bottom-player-card">
-                <img src="/images/cards/Yellow_0.png" class = "bottom-player-card">
+                </a>
+                <a class="player-card">
+                    <img src="/images/cards/Red_1.png" class = "bottom-player-card">
+                </a>
+                <a class="player-card">
+                    <img src="/images/cards/Red_1.png" class = "bottom-player-card">
+                </a>
+                <a class="player-card">
+                    <img src="/images/cards/Red_1.png" class = "bottom-player-card">
+                </a>
+                <a class="player-card">
+                    <img src="/images/cards/Red_1.png" class = "bottom-player-card">
+                </a>
             </div>
-
         </div>
 
+        <!-- CHAT BOX -->
+        <button id="chat-button">
+            <img src="/images/assets/chat_image.png" class="chat-toggle">
+        </button>
+        <aside class="chat-section">
+        <div class="chat-header">Lobby Chat</div>
+
+        <div class="chat-messages">
+          <div class="message">
+            <span class="message-user">Alice:</span>
+            <span class="message-text">Anyone up for a quick game?</span>
+          </div>
+          <div class="message">
+            <span class="message-user">Bob:</span>
+            <span class="message-text">Give me 2 minutes!</span>
+          </div>
+        </div>
+
+        <form class="chat-input" action="#" method="POST">
+          <input
+            type="text"
+            name="message"
+            placeholder="Type a message..."
+            autocomplete="off"
+          />
+          <button type="submit" class="-message">Send</button>
+        </form>
+      </aside>
+
+      <script>
+        const chatButton = document.getElementById('chat-button');
+        const chatSection = document.querySelector('.chat-section');
+
+        // Toggle chat on button click
+        chatButton.addEventListener('click', (e) => {
+            chatSection.classList.toggle('open');
+        });
+
+        // Close when clicking outside chat AND outside button
+        document.addEventListener('click', (e) => {
+            const clickedInsideChat = chatSection.contains(e.target);
+            const clickedChatButton = chatButton.contains(e.target);
+
+            if (!clickedInsideChat && !clickedChatButton) {
+                chatSection.classList.remove('open');
+            }
+        });
+
+        // Close on Escape
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                chatSection.classList.remove('open');
+            }
+        });
+        </script>
+    
     </body>
 </html>

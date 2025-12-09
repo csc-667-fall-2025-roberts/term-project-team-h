@@ -30,6 +30,7 @@
         </section>
 
         <section class="column">
+          <% if (isGameMaster) { %>
           <button
             class="primary-button wide-button"
             type="button"
@@ -37,6 +38,7 @@
           >
             Set Room Password
           </button>
+          <%}%>
           <button
             class="secondary-button wide-button"
             type="button"
@@ -44,6 +46,15 @@
           >
             Invite Player
           </button>
+          <% if (!isGameMaster) { %>
+          <button
+            class="primary-button wide-button"
+            type="button"
+            id="waiting-leave-game"
+          >
+            Leave Room
+          </button>
+          <%}%>
         </section>
       </main>
 
