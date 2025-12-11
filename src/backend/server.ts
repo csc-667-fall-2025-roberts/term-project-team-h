@@ -2,6 +2,7 @@ import * as path from "path";
 import express from "express";
 import morgan from "morgan";
 import createHttpError from "http-errors";
+import { createServer } from "http";
 
 import { sessionMiddleware } from "./config/session";
 import { requireUser } from "./middleware";
@@ -10,8 +11,10 @@ import { authRoutes } from "./routes/auth";
 import { waitingRoomRoutes } from "./routes/waiting_room";
 import { gamesRouter } from "./routes/games";
 
+import { initializeSocketIO } from "./socket";
 
 const app = express();
+const httpServer = createServer(app);
 
 const PORT = process.env.PORT || 3001;
 
@@ -37,6 +40,9 @@ app.use((_request, response, next) => {
   next(response.render("HTTPError", { error: "Page Not Found"}));
 });
 
-app.listen(PORT, () => {
+const io = initializeSocketIO(httpServer, sessionMiddleware as any);
+app.set("io", io);
+
+httpServer.listen(PORT, () => {
   console.log(`Server started on port ${PORT}`);
 });
