@@ -2,3 +2,10 @@
 package-lock.json
 
 node_modules
+
+# Build outputs
+dist/
+src/backend/public/js/
+
+# OS files
+.DS_Store
