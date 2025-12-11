@@ -9,6 +9,8 @@ import { requireUser } from "./middleware";
 import { lobbyRoutes } from "./routes/lobby";
 import { authRoutes } from "./routes/auth";
 import { waitingRoomRoutes } from "./routes/waiting_room";
+import { gamesRouter } from "./routes/games";
+
 import { initializeSocketIO } from "./socket";
 
 const app = express();
@@ -28,19 +30,10 @@ app.use(sessionMiddleware);
 app.use("/lobby", requireUser, lobbyRoutes);
 app.use("/auth", authRoutes);
 app.use("/waiting_room", waitingRoomRoutes);
-
+app.use("/games", gamesRouter);
 
 app.get("/", (_request, response) => {
   response.render("root");
-});
-
-app.get("/games/:id", requireUser, (request, response) => {
-  const { id } = request.params;
-  response.render("gamee", { gameId: id });
-});
-
-app.get("/og", (request, response) => {
-  response.render("game");
 });
 
 app.use((_request, response, next) => {
