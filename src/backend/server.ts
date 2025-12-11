@@ -7,6 +7,7 @@ import { sessionMiddleware } from "./config/session";
 import { requireUser } from "./middleware";
 import { lobbyRoutes } from "./routes/lobby";
 import { authRoutes } from "./routes/auth";
+import { waitingRoomRoutes } from "./routes/waiting_room";
 
 const app = express();
 
@@ -23,6 +24,8 @@ app.use(sessionMiddleware);
 
 app.use("/lobby", requireUser, lobbyRoutes);
 app.use("/auth", authRoutes);
+app.use("/waiting_room", waitingRoomRoutes);
+
 
 app.get("/", (_request, response) => {
   response.render("root");
