@@ -5,8 +5,10 @@ const router = express.Router();
 
 router.get("/", async (req, res, next) => {
   try {
+    console.log(`[LOBBY] GET / - Session ID: ${req.sessionID}, User:`, req.session?.user);
     if (!req.session || !req.session.user) {
-      return res.redirect("/login");
+      console.log(`[LOBBY] No session or user, redirecting to /auth/login`);
+      return res.redirect("/auth/login");
     }
 
     const rooms = await getLobbyRooms();

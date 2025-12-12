@@ -19,6 +19,11 @@ const httpServer = createServer(app);
 
 const PORT = process.env.PORT || 3001;
 
+if (process.env.NODE_ENV === "production") {
+  app.set("trust proxy", 1);
+  console.log("[SERVER] Trust proxy enabled for production");
+}
+
 app.use(morgan("dev"));
 app.use(express.static(path.join(__dirname, "public")));
 app.use(express.urlencoded({ extended: true }));
