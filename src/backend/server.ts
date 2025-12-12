@@ -10,6 +10,7 @@ import { lobbyRoutes } from "./routes/lobby";
 import { authRoutes } from "./routes/auth";
 import { waitingRoomRoutes } from "./routes/waiting_room";
 import { gamesRouter } from "./routes/games";
+import { chatRoutes } from "./routes/chat";
 
 import { initializeSockets } from "./socket";
 
@@ -31,6 +32,7 @@ app.use("/lobby", requireUser, lobbyRoutes);
 app.use("/auth", authRoutes);
 app.use("/waiting_room", waitingRoomRoutes);
 app.use("/games", gamesRouter);
+app.use("/chat", chatRoutes);
 
 app.get("/", (_request, response) => {
   response.render("root");
