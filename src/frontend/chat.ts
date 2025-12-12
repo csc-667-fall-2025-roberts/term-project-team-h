@@ -85,6 +85,14 @@ export class ChatManager {
   private setupFormHandlers(): void {
     if (!this.messageInput || !this.sendButton || this.formHandlersSetup) return;
 
+    const form = this.messageInput.closest("form");
+    if (form) {
+      form.addEventListener("submit", (e) => {
+        e.preventDefault();
+        this.sendMessage();
+      });
+    }
+
     this.sendButton.addEventListener("click", (e) => {
       e.preventDefault();
       this.sendMessage();
