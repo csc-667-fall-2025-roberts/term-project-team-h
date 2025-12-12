@@ -1,128 +1,117 @@
-import express, { Request, Response } from "express";
+import express from "express";
 import { Server as SocketIOServer } from "socket.io";
-import * as chatDB from "../db/chat";
+import * as Chat from "../db/chat";
 import { isUserInRoom } from "../db/lobby";
 import { requireUser } from "../middleware";
+import { CHAT_LISTING, CHAT_MESSAGE, GLOBAL_ROOM } from "@shared/keys";
 
 const router = express.Router();
 
-function getValidatedRoomId(roomIdParam: string | undefined): number | null {
-  if (!roomIdParam) {
-    return null;
-  }
-  const roomId = Number(roomIdParam);
-  return Number.isFinite(roomId) ? roomId : null;
-}
+// Global lobby chat
+router.get("/", requireUser, async (request, response) => {
+  response.status(202).send();
 
-async function checkUserInRoom(roomId: number, userId: number): Promise<boolean> {
-  return await isUserInRoom(roomId, userId);
-}
-
-async function validateChatRequest(
-  req: Request,
-  res: Response
-): Promise<{ valid: false; response: Response } | { valid: true; roomId: number; userId: number }> {
-  if (!req.session || !req.session.user) {
-    return { valid: false, response: res.status(401).json({ error: "Unauthorized" }) };
+  if (!request.session?.user) {
+    return;
   }
 
-  const roomId = getValidatedRoomId(req.params.roomId);
-  if (roomId === null) {
-    return { valid: false, response: res.status(400).json({ error: "Invalid room ID" }) };
-  }
+  const messages = await Chat.list();
 
-  const userId = req.session.user.id;
-  const userInRoom = await checkUserInRoom(roomId, userId);
-  if (!userInRoom) {
-    return { valid: false, response: res.status(403).json({ error: "You are not in this room" }) };
-  }
-
-  return { valid: true, roomId, userId };
-}
-
-function getValidatedMessage(message: unknown): string | null {
-  if (!message || typeof message !== "string") {
-    return null;
-  }
-
-  const trimmedMessage = message.trim();
-  if (trimmedMessage.length === 0) {
-    return null;
-  }
-
-  if (trimmedMessage.length > 140) {
-    return null;
-  }
-
-  return trimmedMessage;
-}
-
-router.get("/:roomId", requireUser, async (req, res, next) => {
-  try {
-    const validation = await validateChatRequest(req, res);
-    if (!validation.valid) {
-      return validation.response;
-    }
-
-    const { roomId } = validation;
-
-    const messages = await chatDB.findChatMessagesByGameRoom(roomId);
-    return res.json({ messages });
-  } catch (err) {
-    next(err);
-  }
+  const io = request.app.get("io") as SocketIOServer;
+  const sessionId = request.session.id;
+  io.to(sessionId).emit(CHAT_LISTING, { messages });
 });
 
-router.post("/:roomId", requireUser, async (req, res, next) => {
-  try {
-    const validation = await validateChatRequest(req, res);
-    if (!validation.valid) {
-      return validation.response;
-    }
+router.post("/", requireUser, async (request, response) => {
+  response.status(202).send();
 
-    const { roomId, userId } = validation;
-
-    const validatedMessage = getValidatedMessage(req.body.message);
-    if (validatedMessage === null) {
-      const { message } = req.body;
-      if (!message || typeof message !== "string") {
-        return res.status(400).json({ error: "Invalid message" });
-      }
-      const trimmed = message.trim();
-      if (trimmed.length === 0) {
-        return res.status(400).json({ error: "Message cannot be empty" });
-      }
-      if (trimmed.length > 140) {
-        return res.status(400).json({ error: "Message is too long (max 140 characters)" });
-      }
-      return res.status(400).json({ error: "Invalid message" });
-    }
-
-    const username = req.session!.user!.username;
-    const savedMessage = await chatDB.createChatMessage({
-      user_id: userId,
-      game_room_id: roomId,
-      message: validatedMessage,
-    });
-
-    const messageWithUsername: chatDB.ChatMessageWithUsername = {
-      ...savedMessage,
-      username,
-    };
-
-    const io = req.app.get("io") as SocketIOServer;
-    if (io) {
-      io.to(`room:${roomId}`).emit("new-message", {
-        roomId,
-        message: messageWithUsername,
-      });
-    }
-
-    return res.status(201).json({ message: messageWithUsername });
-  } catch (err) {
-    next(err);
+  if (!request.session?.user) {
+    return;
   }
+
+  const { id } = request.session.user;
+  const { message } = request.body;
+
+  if (!message || typeof message !== "string" || message.trim().length === 0) {
+    return;
+  }
+
+  if (message.trim().length > 140) {
+    return;
+  }
+
+  const result = await Chat.create(id, message.trim());
+
+  const io = request.app.get("io") as SocketIOServer;
+  io.to(GLOBAL_ROOM).emit(CHAT_MESSAGE, result);
+});
+
+// Room-specific chat
+router.get("/:roomId", requireUser, async (request, response) => {
+  response.status(202).send();
+
+  if (!request.session?.user) {
+    return;
+  }
+
+  const roomId = Number(request.params.roomId);
+  if (!Number.isFinite(roomId)) {
+    return;
+  }
+
+  const userId = request.session.user.id;
+  const userInRoom = await isUserInRoom(roomId, userId);
+  if (!userInRoom) {
+    return;
+  }
+
+  const messages = await Chat.findChatMessagesByGameRoom(roomId);
+
+  const io = request.app.get("io") as SocketIOServer;
+  const sessionId = request.session.id;
+  io.to(sessionId).emit(CHAT_LISTING, { messages });
+});
+
+router.post("/:roomId", requireUser, async (request, response) => {
+  response.status(202).send();
+
+  if (!request.session?.user) {
+    return;
+  }
+
+  const roomId = Number(request.params.roomId);
+  if (!Number.isFinite(roomId)) {
+    return;
+  }
+
+  const userId = request.session.user.id;
+  const userInRoom = await isUserInRoom(roomId, userId);
+  if (!userInRoom) {
+    return;
+  }
+
+  const { message } = request.body;
+  if (!message || typeof message !== "string" || message.trim().length === 0) {
+    return;
+  }
+
+  if (message.trim().length > 140) {
+    return;
+  }
+
+  const savedMessage = await Chat.createChatMessage({
+    user_id: userId,
+    game_room_id: roomId,
+    message: message.trim(),
+  });
+
+  const messageWithUsername: Chat.ChatMessageWithUsername = {
+    ...savedMessage,
+    username: request.session.user.username,
+  };
+
+  const io = request.app.get("io") as SocketIOServer;
+  io.to(`room:${roomId}`).emit(CHAT_MESSAGE, messageWithUsername);
 });
 
 export { router as chatRoutes };
-

@@ -104,3 +104,41 @@ export async function getRecentChatMessages(
   return messages || [];
 }
 
+/**
+ * List all messages for global lobby (where game_room_id is null)
+ */
+export async function list(): Promise<ChatMessageWithUsername[]> {
+  const messages = await db.manyOrNone<ChatMessageWithUsername>(
+    `SELECT cm.*, u.username
+     FROM chat_messages cm
+     JOIN users u ON cm.user_id = u.id
+     WHERE cm.game_room_id IS NULL
+     ORDER BY cm.created_at ASC`
+  );
+  return messages || [];
+}
+
+/**
+ * Create a message for global lobby
+ */
+export async function create(
+  userId: number,
+  message: string
+): Promise<ChatMessageWithUsername> {
+  const savedMessage = await createChatMessage({
+    user_id: userId,
+    game_room_id: null,
+    message: message.trim(),
+  });
+
+  const user = await db.one<{ username: string }>(
+    "SELECT username FROM users WHERE id = $1",
+    [userId]
+  );
+
+  return {
+    ...savedMessage,
+    username: user.username,
+  };
+}
+
