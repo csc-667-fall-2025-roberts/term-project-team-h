@@ -53,7 +53,8 @@
     "pg-promise": "^12.2.0",
     "socket.io": "^4.8.1",
     "socket.io-client": "^4.8.1",
-    "tsx": "^4.21.0"
+    "tsx": "^4.21.0",
+    "esbuild": "^0.25.10"
   },
   "devDependencies": {
     "@types/express": "^5.0.3",
@@ -63,7 +64,6 @@
     "browser-sync": "^3.0.4",
     "concurrently": "^9.2.1",
     "cross-env": "^10.1.0",
-    "esbuild": "^0.25.10",
     "eslint": "^9.37.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-prettier": "^5.5.4",
