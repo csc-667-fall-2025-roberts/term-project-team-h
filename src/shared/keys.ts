@@ -15,3 +15,6 @@ export const WAITING_ROOM_JOINED = "waitingRoom:joined";
 export const WAITING_ROOM_PLAYERS = "waitingRoom:players";
 export const WAITING_ROOM_START = "waitingRoom:start";
 export const WAITING_ROOM_LEAVE = "waitingRoom:leave";
+
+// Lobby events
+export const LOBBY_ROOM_CREATED = "lobby:room-created";

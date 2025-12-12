@@ -1,6 +1,7 @@
 import { ChatManager } from "./chat";
 import { GLOBAL_ROOM } from "@shared/keys";
 import { initializeWaitingRoom } from "./waitingRoom";
+import { initializeLobbyPage } from "./lobby";
 
 declare global {
   interface Window {
@@ -74,6 +75,7 @@ function initializeChat() {
 function bootstrap() {
   initializeChat();
   initializeWaitingRoom();
+  initializeLobbyPage();
 }
 
 if (document.readyState === "loading") {
