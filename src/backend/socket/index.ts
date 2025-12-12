@@ -11,7 +11,7 @@ export function initializeSockets(
     cors: {
       origin:
         process.env.NODE_ENV === "production"
-          ? false
+          ? process.env.ALLOWED_ORIGIN || true
           : ["http://localhost:3000", "http://localhost:3001"],
       credentials: true,
     },

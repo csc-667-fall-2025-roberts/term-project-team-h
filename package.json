@@ -8,6 +8,7 @@
     "build:frontend": "esbuild src/frontend/entrypoint.ts --bundle --outfile=dist/public/js/bundle.js",
     "build": "npm run build:backend && npm run build:frontend",
     "start": "node dist/backend/server.js",
+    "start:prod": "npm run migrate:up && npm start",
     "dev:frontend": "esbuild src/frontend/entrypoint.ts --bundle --outfile=src/backend/public/js/bundle.js --sourcemap --target=es2020 --watch",
     "dev:backend": "tsx watch --clear-screen=false src/backend/server.ts src/backend/views",
     "dev:live": "browser-sync start --proxy 'http://localhost:3001' --port 3000 --files 'src/backend/**/*.ts' 'src/backend/**/*.ejs' 'src/backend/public/**/*' --reload-delay 1000 --no-ui --no-open --no-ghost-mode",
