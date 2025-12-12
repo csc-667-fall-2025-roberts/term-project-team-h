@@ -19,7 +19,11 @@
   "include": [
     "src/backend/**/*",
     "src/frontend/**/*",
-    "src/shared/**/*",
-    "migrations/**/*"
+    "src/shared/**/*"
+  ],
+  "exclude": [
+    "migrations/**/*",
+    "node_modules",
+    "dist"
   ]
 }

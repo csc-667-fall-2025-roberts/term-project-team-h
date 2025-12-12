@@ -11,7 +11,7 @@ import { authRoutes } from "./routes/auth";
 import { waitingRoomRoutes } from "./routes/waiting_room";
 import { gamesRouter } from "./routes/games";
 
-import { initializeSocketIO } from "./socket";
+import { initializeSockets } from "./socket";
 
 const app = express();
 const httpServer = createServer(app);
@@ -40,7 +40,7 @@ app.use((_request, response, next) => {
   next(response.render("HTTPError", { error: "Page Not Found"}));
 });
 
-const io = initializeSocketIO(httpServer, sessionMiddleware as any);
+const io = initializeSockets(httpServer, sessionMiddleware as any);
 app.set("io", io);
 
 httpServer.listen(PORT, () => {
