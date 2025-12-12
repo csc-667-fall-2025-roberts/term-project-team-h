@@ -10,3 +10,13 @@ export const PLAYER_JOINED = "player:joined";
 export const GAME_STARTED = "game:started";
 export const ASK_RESULT = "game:ask-result";
 
+// Wait Room Events
+export const WAITING_ROOM_JOINED = "waitingRoom:joined";
+export const WAITING_ROOM_PLAYERS = "waitingRoom:players";
+export const WAITING_ROOM_START = "waitingRoom:start";
+export const WAITING_ROOM_LEAVE = "waitingRoom:leave";
+export const WAITING_ROOM_DELETE = "waitingRoom:delete";
+
+// Lobby events
+export const LOBBY_ROOM_CREATED = "lobby:room-created";
+export const LOBBY_ROOM_DELETED = "lobby:room-deleted";

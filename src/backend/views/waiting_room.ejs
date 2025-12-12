@@ -7,7 +7,11 @@
     <link rel="stylesheet" href="/stylesheets/waiting_room.css" />
   </head>
   <body>
-    <div class="page">
+    <div
+      class="page"
+      data-room-id="<%= room.id %>"
+      data-is-gamemaster="<%= isGameMaster %>"
+    >
       <header class="page-header">
         <h1><%= room.hostUsername %>'s Game Lobby</h1>
       </header>
@@ -37,23 +41,23 @@
             >
               Set Room Password
             </button>
-            <%}%>
             <button
               class="secondary-button wide-button"
               type="button"
-              id="waiting-invite-player"
+              id="waiting-delete-room"
             >
-              Invite Player
-            </button>
-            <% if (!isGameMaster) { %>
-            <button
-              class="primary-button wide-button"
-              type="button"
-              id="waiting-leave-game"
-            >
-              Leave Room
+              Delete Room
             </button>
             <%}%>
+            <% if (!isGameMaster) { %>
+              <button
+                class="primary-button wide-button"
+                type="button"
+                id="waiting-leave-game"
+              >
+                Leave Room
+              </button>
+            <% } %>
           </div>
         </section>
 
@@ -79,9 +83,13 @@
       <footer class="page-footer">
         <div class="start-wrapper">
           <% if (isGameMaster) { %>
-            <a href="/games/<%= room.id %>" class="primary-button start-button">
+            <button
+              type="button"
+              class="primary-button start-button"
+              id="waiting-start-game"
+            >
               Start Game
-            </a>
+            </button>
           <% } else { %>
             <span>Waiting for host to start the game…</span>
           <% } %>

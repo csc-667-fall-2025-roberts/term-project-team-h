@@ -114,4 +114,15 @@ export const waitingRoomQueries = {
       started_at AS "startedAt",
       ended_at AS "EndedAt"
   `,
+
+  removePlayerFromRoom: `
+    DELETE FROM game_room_players
+    WHERE game_room_id = $1 AND user_id = $2;
+  `,
+
+  deleteRoom: `
+      DELETE FROM game_rooms
+      WHERE id = $1
+  `,
 };
+

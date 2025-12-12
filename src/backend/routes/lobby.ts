@@ -1,5 +1,7 @@
 import express from "express";
 import { getLobbyRooms, createGameRoom } from "../db/lobby/index";
+import { GLOBAL_ROOM, LOBBY_ROOM_CREATED } from "@shared/keys";
+import { Server } from "socket.io";
 
 const router = express.Router();
 
@@ -45,13 +47,22 @@ router.post("/create_game", async (req, res, next) => {
         ? password.trim()
         : null;
 
-    // IMPORTANT: this must return the created room's ID
     const { id: roomId } = await createGameRoom({
       title: trimmedTitle,
       maxPlayers: parsedMax,
       password: trimmedPassword,
       createdBy: host.id,
     });
+
+    const io = req.app.get("io") as Server | undefined;
+    if (io) {
+      io.to(GLOBAL_ROOM).emit(LOBBY_ROOM_CREATED, {
+        id: roomId,
+        title: trimmedTitle,
+        maxPlayers: parsedMax,
+        hostUsername: host.username,
+      });
+    }
 
     // redirect to waiting room with the correct id
     return res.redirect(`/waiting_room/${roomId}`);

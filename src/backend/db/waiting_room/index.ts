@@ -129,3 +129,15 @@ export async function setWaitingRoomPassword(
     status: row.status as GameStatus,
   };
 }
+
+export async function removeUserFromWaitingRoom(
+  roomId: number,
+  userId: number
+): Promise<void> {
+  await db.none(waitingRoomQueries.removePlayerFromRoom, [roomId, userId]);
+}
+
+
+export async function deleteWaitingRoom(roomId: number): Promise<void> {
+    await db.none(waitingRoomQueries.deleteRoom, [roomId]);
+}
