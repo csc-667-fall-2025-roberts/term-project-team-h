@@ -27,34 +27,34 @@
               <% }); %>
             </ul>
           </div>
-        </section>
 
-        <section class="column">
-          <% if (isGameMaster) { %>
-          <button
-            class="primary-button wide-button"
-            type="button"
-            id="waiting-set-room-password"
-          >
-            Set Room Password
-          </button>
-          <%}%>
-          <button
-            class="secondary-button wide-button"
-            type="button"
-            id="waiting-invite-player"
-          >
-            Invite Player
-          </button>
-          <% if (!isGameMaster) { %>
-          <button
-            class="primary-button wide-button"
-            type="button"
-            id="waiting-leave-game"
-          >
-            Leave Room
-          </button>
-          <%}%>
+          <div style="margin-top: 24px;">
+            <% if (isGameMaster) { %>
+            <button
+              class="primary-button wide-button"
+              type="button"
+              id="waiting-set-room-password"
+            >
+              Set Room Password
+            </button>
+            <%}%>
+            <button
+              class="secondary-button wide-button"
+              type="button"
+              id="waiting-invite-player"
+            >
+              Invite Player
+            </button>
+            <% if (!isGameMaster) { %>
+            <button
+              class="primary-button wide-button"
+              type="button"
+              id="waiting-leave-game"
+            >
+              Leave Room
+            </button>
+            <%}%>
+          </div>
         </section>
 
         <!-- CHAT PANEL -->
