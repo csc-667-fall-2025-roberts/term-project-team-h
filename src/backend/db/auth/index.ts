@@ -20,20 +20,6 @@ export interface CreateUserData {
   password: string;
 }
 
-export interface UpdateUserData {
-  username?: string;
-  email?: string;
-  password?: string;
-}
-
-/**
- * Find a user by ID
- */
-export async function findUserById(id: number): Promise<User | null> {
-  const user = await db.oneOrNone<User>(userQueries.findById, [id]);
-  return user;
-}
-
 /**
  * Find a user by username
  */
@@ -59,36 +45,6 @@ export async function createUser(data: CreateUserData): Promise<Omit<User, "pass
     [data.username, data.email, data.password]
   );
   return user;
-}
-
-/**
- * Update an existing user
- */
-export async function updateUser(
-  id: number,
-  data: UpdateUserData
-): Promise<Omit<User, "password"> | null> {
-  const user = await db.oneOrNone<Omit<User, "password">>(
-    userQueries.update,
-    [data.username, data.email, data.password, id]
-  );
-  return user;
-}
-
-/**
- * Delete a user
- */
-export async function deleteUser(id: number): Promise<boolean> {
-  const result = await db.result(userQueries.delete, [id]);
-  return result.rowCount > 0;
-}
-
-/**
- * List all users (without passwords)
- */
-export async function listUsers(): Promise<Omit<User, "password">[]> {
-  const users = await db.manyOrNone<Omit<User, "password">>(userQueries.list);
-  return users || [];
 }
 
 /**
