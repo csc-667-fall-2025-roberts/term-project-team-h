@@ -137,3 +137,7 @@ export async function removeUserFromWaitingRoom(
   await db.none(waitingRoomQueries.removePlayerFromRoom, [roomId, userId]);
 }
 
+
+export async function deleteWaitingRoom(roomId: number): Promise<void> {
+    await db.none(waitingRoomQueries.deleteRoom, [roomId]);
+}

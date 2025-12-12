@@ -5,11 +5,15 @@ import {
   WAITING_ROOM_START,
   GAME_STARTED,
   WAITING_ROOM_LEAVE,
+  WAITING_ROOM_DELETE,
+  GLOBAL_ROOM,
+  LOBBY_ROOM_DELETED
 } from "@shared/keys";
 import { 
   isUserInWaitingRoom, 
   getWaitingRoomPlayers, 
-  removeUserFromWaitingRoom 
+  removeUserFromWaitingRoom,
+  deleteWaitingRoom
 } from "../db/waiting_room";
 
 export interface WaitRoomSocket extends Socket {
@@ -103,10 +107,52 @@ export function initializeWaitRoomHandlers(socket: WaitRoomSocket, io: Server): 
     });
   });
 
+
   // ---------------------------
-  // WAITING_ROOM_LEAVE
+  // WAITING_ROOM_DELETE (host only)
   // ---------------------------
-  socket.on(WAITING_ROOM_LEAVE, async (data: { roomId: number }) => {
+  socket.on(WAITING_ROOM_DELETE, async (data: { roomId: number }) => {
     const { roomId } = data;
+
+    if (!Number.isFinite(roomId)) {
+      socket.emit("waitingRoom:error", { message: "Invalid room ID" });
+      return;
+    }
+
+    const userId = socket.userId;
+
+    // Make sure this user is in the room
+    const inRoom = await isUserInWaitingRoom(roomId, userId);
+    if (!inRoom) {
+      socket.emit("waitingRoom:error", {
+        message: "You are not in this room",
+      });
+      return;
+    }
+
+    // Load players to verify host
+    const players = await getWaitingRoomPlayers(roomId);
+    const me = players.find(
+      (p) => Number(p.userId) === Number(socket.userId)
+    );
+
+    if (!me || !me.isGameMaster) {
+      socket.emit("waitingRoom:error", {
+        message: "Only the host can delete this room",
+      });
+      return;
+    }
+
+    console.log(
+      `[waiting-room] Host ${socket.username} (ID: ${userId}) is deleting room ${roomId}`
+    );
+
+    // Delete the room (this will cascade to game_room_players etc.)
+    await deleteWaitingRoom(roomId);
+
+    // Notify everyone who was in that waiting room
+    io.to(`waiting-room:${roomId}`).emit("waitingRoom:deleted", { roomId });
+    io.to(GLOBAL_ROOM).emit(LOBBY_ROOM_DELETED, { roomId });
   });
+
 }

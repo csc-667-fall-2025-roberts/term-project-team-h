@@ -1,5 +1,5 @@
 import { io, Socket } from "socket.io-client";
-import { GLOBAL_ROOM, LOBBY_ROOM_CREATED } from "@shared/keys";
+import { GLOBAL_ROOM, LOBBY_ROOM_CREATED, LOBBY_ROOM_DELETED } from "@shared/keys";
 
 export function initializeLobbyPage(): void {
   const lobbyRoot = document.querySelector(".lobby-page");
@@ -17,4 +17,10 @@ export function initializeLobbyPage(): void {
 
     window.location.reload();
   });
+
+  socket.on(LOBBY_ROOM_DELETED, ({ roomId }) => {
+  console.log("[lobby] room deleted:", roomId);
+
+  window.location.reload();
+});
 }

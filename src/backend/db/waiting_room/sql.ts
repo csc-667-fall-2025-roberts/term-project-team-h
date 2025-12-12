@@ -119,4 +119,10 @@ export const waitingRoomQueries = {
     DELETE FROM game_room_players
     WHERE game_room_id = $1 AND user_id = $2;
   `,
+
+  deleteRoom: `
+      DELETE FROM game_rooms
+      WHERE id = $1
+  `,
 };
+
