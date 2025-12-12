@@ -1,10 +1,10 @@
-// src/frontend/waiting_room.ts
 import { io, Socket } from "socket.io-client";
 import {
   WAITING_ROOM_JOINED,
   WAITING_ROOM_PLAYERS,
   WAITING_ROOM_START,
   GAME_STARTED,
+  WAITING_ROOM_LEAVE,
 } from "../shared/keys";
 
 interface WaitingRoomPlayer {
@@ -25,15 +25,10 @@ interface GameStartedPayload {
 
 export function initializeWaitingRoom(): void {
   const root = document.querySelector<HTMLElement>(".page");
-  if (!root) return; // not on a waiting-room-style page
+  if (!root || !root.dataset.roomId) return; // not a waiting-room page
 
   const roomIdAttr = root.dataset.roomId;
   const isGameMasterAttr = root.dataset.isGamemaster;
-
-  if (!roomIdAttr) {
-    console.error("[waiting-room] Missing data-room-id on .page");
-    return;
-  }
 
   const roomId = Number(roomIdAttr);
   if (!Number.isFinite(roomId)) {
@@ -47,21 +42,20 @@ export function initializeWaitingRoom(): void {
     document.querySelector<HTMLUListElement>(".player-list");
   const startButton =
     document.getElementById("waiting-start-game") as HTMLButtonElement | null;
-
-  // If there's no players list, nothing to do
-  if (!playersList) {
-    console.warn("[waiting-room] .player-list not found");
-  }
+  const leaveButton =
+    document.getElementById("waiting-leave-game") as HTMLButtonElement | null;
 
   // Create socket (same pattern as ChatManager: withCredentials: true)
   const socket: Socket = io({ withCredentials: true });
 
   socket.on("connect", () => {
-    console.log("[waiting-room] socket connected", socket.id);
+    console.log("[waiting-room] socket connected", socket.id, "roomId=", roomId);
     socket.emit(WAITING_ROOM_JOINED, { roomId });
   });
 
   socket.on(WAITING_ROOM_PLAYERS, (payload: WaitingRoomPlayersPayload) => {
+    console.log("[waiting-room] received WAITING_ROOM_PLAYERS", payload);
+
     if (!playersList) return;
     if (payload.roomId !== roomId) return;
 
@@ -85,6 +79,20 @@ export function initializeWaitingRoom(): void {
     startButton.addEventListener("click", () => {
       startButton.disabled = true;
       socket.emit(WAITING_ROOM_START, { roomId });
+    });
+  }
+
+  if (leaveButton) {
+    leaveButton.addEventListener("click", () => {
+      console.log("[waiting-room] leaving room", roomId);
+
+      // Send leave event to server
+      socket.emit(WAITING_ROOM_LEAVE, { roomId });
+
+      // Give the event a moment to actually go over the wire
+      setTimeout(() => {
+        window.location.href = "/lobby";
+      }, 100);
     });
   }
 
