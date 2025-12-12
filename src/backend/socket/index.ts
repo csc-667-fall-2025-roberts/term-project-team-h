@@ -2,6 +2,7 @@ import { Server as HTTPServer } from "http";
 import { Server as SocketIOServer } from "socket.io";
 import { SessionData } from "express-session";
 import { RequestHandler } from "express";
+import { initializeChatHandlers, ChatSocket } from "./chat";
 
 export function initializeSockets(
   httpServer: HTTPServer,
@@ -20,7 +21,7 @@ export function initializeSockets(
   io.engine.use(sessionMiddleware as any);
 
   io.on("connection", (socket: any) => {
-    const session = socket.request.session as SessionData;
+    const session = socket.request.session as SessionData & { id?: string };
 
     if (!session || !session.user) {
       socket.disconnect();
@@ -30,7 +31,14 @@ export function initializeSockets(
     socket.userId = session.user.id;
     socket.username = session.user.username;
 
+    // Join socket to session ID room (so HTTP routes can emit to this specific socket)
+    if (session.id) {
+      socket.join(session.id);
+    }
+
     console.log(`Socket connection established for user ${socket.username} (ID: ${socket.userId})`);
+
+    initializeChatHandlers(socket as ChatSocket);
 
     socket.on("disconnect", () => {
       console.log(`Socket disconnected for user ${socket.username} (ID: ${socket.userId})`);

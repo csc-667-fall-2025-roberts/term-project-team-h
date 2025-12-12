@@ -71,24 +71,16 @@
       </section>
 
       <!-- CHAT PANEL  -->
-      <aside class="chat-section">
+      <aside class="chat-section" data-room-type="lobby">
         <div class="chat-header">Lobby Chat</div>
 
-        <div class="chat-messages">
-          <div class="message">
-            <span class="message-user">Alice:</span>
-            <span class="message-text">Anyone up for a quick game?</span>
-          </div>
-          <div class="message">
-            <span class="message-user">Bob:</span>
-            <span class="message-text">Give me 2 minutes!</span>
-          </div>
-        </div>
+        <div class="chat-messages" id="chat-messages"></div>
 
-        <form class="chat-input" action="#" method="POST">
+        <form class="chat-input" id="chat-form">
           <input
             type="text"
             name="message"
+            id="chat-input-field"
             placeholder="Type a message..."
             autocomplete="off"
           />
@@ -203,5 +195,7 @@
         });
       }
     </script>
+
+    <script src="/js/bundle.js"></script>
   </body>
 </html>
