@@ -3,7 +3,7 @@ import { Server as SocketIOServer } from "socket.io";
 import { SessionData } from "express-session";
 import { RequestHandler } from "express";
 import { initializeChatHandlers, ChatSocket } from "./chat";
-import { initializeWaitRoomHandlers, WaitRoomSocket } from "./waiting_room";
+import { initializeWaitRoomHandlers, WaitRoomSocket } from "./waitingRoomSocket";
 
 export function initializeSockets(
   httpServer: HTTPServer,
