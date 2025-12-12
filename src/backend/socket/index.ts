@@ -3,6 +3,7 @@ import { Server as SocketIOServer } from "socket.io";
 import { SessionData } from "express-session";
 import { RequestHandler } from "express";
 import { initializeChatHandlers, ChatSocket } from "./chat";
+import { initializeWaitRoomHandlers, WaitRoomSocket } from "./waiting_room";
 
 export function initializeSockets(
   httpServer: HTTPServer,
@@ -39,6 +40,7 @@ export function initializeSockets(
     console.log(`Socket connection established for user ${socket.username} (ID: ${socket.userId})`);
 
     initializeChatHandlers(socket as ChatSocket);
+    initializeWaitRoomHandlers(socket as WaitRoomSocket, io);
 
     socket.on("disconnect", () => {
       console.log(`Socket disconnected for user ${socket.username} (ID: ${socket.userId})`);

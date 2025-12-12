@@ -1,10 +1,12 @@
 import { ChatManager } from "./chat";
 import { GLOBAL_ROOM } from "@shared/keys";
+import { initializeWaitingRoom } from "./waitingRoom";
 
 declare global {
   interface Window {
     ChatManager: typeof ChatManager;
     GLOBAL_ROOM: string;
+    __chatInitialized?: boolean;
   }
 }
 
@@ -17,16 +19,22 @@ function initializeChat() {
     console.log("Chat already initialized, skipping...");
     return;
   }
-  
+
   const chatSection = document.querySelector(".chat-section");
   if (!chatSection) return;
 
   const roomType = chatSection.getAttribute("data-room-type");
   if (!roomType) return;
 
-  const messageContainer = chatSection.querySelector("#chat-messages") as HTMLElement;
-  const messageInput = chatSection.querySelector("#chat-input-field") as HTMLInputElement;
-  const sendButton = chatSection.querySelector("#chat-form button[type='submit']") as HTMLButtonElement;
+  const messageContainer = chatSection.querySelector(
+    "#chat-messages"
+  ) as HTMLElement | null;
+  const messageInput = chatSection.querySelector(
+    "#chat-input-field"
+  ) as HTMLInputElement | null;
+  const sendButton = chatSection.querySelector(
+    "#chat-form button[type='submit']"
+  ) as HTMLButtonElement | null;
 
   if (!messageContainer || !messageInput || !sendButton) {
     console.error("Chat: Required elements not found");
@@ -59,13 +67,17 @@ function initializeChat() {
     messageInput,
     sendButton,
   });
-  
+
   (window as any).__chatInitialized = true;
 }
 
-if (document.readyState === "loading") {
-  document.addEventListener("DOMContentLoaded", initializeChat);
-} else {
+function bootstrap() {
   initializeChat();
+  initializeWaitingRoom();
 }
 
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", bootstrap);
+} else {
+  bootstrap();
+}
