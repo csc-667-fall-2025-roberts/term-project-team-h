@@ -5,8 +5,8 @@
   "main": "index.js",
   "scripts": {
     "build:backend": "rm -rf dist && tsc && npx tsc-alias && cp -R src/backend/views dist/backend/views && cp -R src/backend/public dist/backend/public",
-    "build:frontend": "esbuild src/frontend/entrypoint.ts --bundle --outfile=src/backend/public/js/bundle.js --sourcemap --target=es2020",
-    "build": "npm run build:backend && npm run build:frontend",
+    "build:frontend": "npx esbuild src/frontend/entrypoint.ts --bundle --outfile=src/backend/public/js/bundle.js --sourcemap --target=es2020",
+    "build": "npm run build:frontend && npm run build:backend",
     "start": "node dist/backend/server.js",
     "migrate:up:prod": "NODE_OPTIONS=\"--import tsx\" node-pg-migrate up",
     "migrate:down:prod": "NODE_OPTIONS=\"--import tsx\" node-pg-migrate down",
