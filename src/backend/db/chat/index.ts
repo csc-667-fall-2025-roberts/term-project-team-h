@@ -24,14 +24,6 @@ export interface CreateChatMessageData {
 }
 
 /**
- * Find a chat message by ID
- */
-export async function findChatMessageById(id: number): Promise<ChatMessage | null> {
-  const message = await db.oneOrNone<ChatMessage>(chatQueries.findById, [id]);
-  return message;
-}
-
-/**
  * Find all chat messages for a game room
  */
 export async function findChatMessagesByGameRoom(
@@ -45,14 +37,6 @@ export async function findChatMessagesByGameRoom(
 }
 
 /**
- * Find all chat messages by a user
- */
-export async function findChatMessagesByUser(userId: number): Promise<ChatMessage[]> {
-  const messages = await db.manyOrNone<ChatMessage>(chatQueries.findByUser, [userId]);
-  return messages || [];
-}
-
-/**
  * Create a new chat message
  */
 export async function createChatMessage(data: CreateChatMessageData): Promise<ChatMessage> {
@@ -61,47 +45,6 @@ export async function createChatMessage(data: CreateChatMessageData): Promise<Ch
     [data.user_id, data.game_room_id, data.message]
   );
   return message;
-}
-
-/**
- * Update a chat message
- */
-export async function updateChatMessage(
-  id: number,
-  message: string
-): Promise<ChatMessage | null> {
-  const updatedMessage = await db.oneOrNone<ChatMessage>(chatQueries.update, [message, id]);
-  return updatedMessage;
-}
-
-/**
- * Delete a chat message
- */
-export async function deleteChatMessage(id: number): Promise<boolean> {
-  const result = await db.result(chatQueries.delete, [id]);
-  return result.rowCount > 0;
-}
-
-/**
- * Delete all chat messages for a game room
- */
-export async function deleteChatMessagesByGameRoom(gameRoomId: number): Promise<number> {
-  const result = await db.result(chatQueries.deleteByGameRoom, [gameRoomId]);
-  return result.rowCount;
-}
-
-/**
- * Get recent chat messages for a game room
- */
-export async function getRecentChatMessages(
-  gameRoomId: number,
-  limit: number = 50
-): Promise<ChatMessageWithUsername[]> {
-  const messages = await db.manyOrNone<ChatMessageWithUsername>(
-    chatQueries.recentMessages,
-    [gameRoomId, limit]
-  );
-  return messages || [];
 }
 
 /**
