@@ -61,13 +61,7 @@ export const unoCardQueries = {
   findById: "SELECT * FROM uno_cards WHERE id = $1",
   findByColor: "SELECT * FROM uno_cards WHERE color = $1",
   findByValue: "SELECT * FROM uno_cards WHERE value = $1",
-  create: `
-    INSERT INTO uno_cards (color, value)
-    VALUES ($1, $2)
-    RETURNING *
-  `,
   list: "SELECT * FROM uno_cards ORDER BY color, value",
-  delete: "DELETE FROM uno_cards WHERE id = $1",
 };
 
 export const gameRoomDeckQueries = {

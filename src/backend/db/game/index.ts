@@ -63,11 +63,6 @@ export interface UnoCard {
   value: string;
 }
 
-export interface CreateUnoCardData {
-  color: "red" | "blue" | "green" | "yellow" | "wild";
-  value: string;
-}
-
 // Game Room Deck Types
 export interface GameRoomDeck {
   id: number;
@@ -290,19 +285,9 @@ export async function findUnoCardsByValue(value: string): Promise<UnoCard[]> {
   return cards || [];
 }
 
-export async function createUnoCard(data: CreateUnoCardData): Promise<UnoCard> {
-  const card = await db.one<UnoCard>(unoCardQueries.create, [data.color, data.value]);
-  return card;
-}
-
 export async function listUnoCards(): Promise<UnoCard[]> {
   const cards = await db.manyOrNone<UnoCard>(unoCardQueries.list);
   return cards || [];
-}
-
-export async function deleteUnoCard(id: number): Promise<boolean> {
-  const result = await db.result(unoCardQueries.delete, [id]);
-  return result.rowCount > 0;
 }
 
 // Game Room Deck Functions
