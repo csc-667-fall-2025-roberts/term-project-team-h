@@ -94,7 +94,6 @@
                 <h4 class="card-count">Card Count: <%= myCards.length %></h4>
 
                 <% myCards.forEach(card => { %>
-                    <% console.log(card.value) %>
                     <img src="/images/cards/<%= card.color.charAt(0).toUpperCase() + card.color.slice(1) %>_<%= card.value %>.png"
                          class="bottom-player-card"
                          data-card-id = "<%= card.id %>"

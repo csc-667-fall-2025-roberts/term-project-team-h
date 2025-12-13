@@ -68,14 +68,20 @@ export const gameRoomDeckQueries = {
   findById: "SELECT * FROM game_room_decks WHERE id = $1",
   findByGameRoom: "SELECT * FROM game_room_decks WHERE game_room_id = $1",
   findByLocation: `
-    SELECT * FROM game_room_decks
-    WHERE game_room_id = $1 AND location = $2
-    ORDER BY position_index ASC
+    SELECT grd.*, uc.color, uc.value
+    FROM game_room_decks grd
+    JOIN uno_cards uc ON grd.card_id = uc.id
+    WHERE grd.game_room_id = $1
+      AND grd.location = $2
+    ORDER BY grd.position_index ASC
   `,
   findByPlayer: `
-    SELECT * FROM game_room_decks
-    WHERE game_room_id = $1 AND owner_player_id = $2
-    ORDER BY position_index ASC
+    SELECT grd.*, uc.color, uc.value
+    FROM game_room_decks grd
+    JOIN uno_cards uc ON grd.card_id = uc.id
+    WHERE grd.game_room_id = $1
+      AND grd.owner_player_id = $2
+    ORDER BY grd.position_index ASC
   `,
   create: `
     INSERT INTO game_room_decks (game_room_id, card_id, location, owner_player_id, position_index)

@@ -304,54 +304,29 @@ export async function findGameRoomDecksByGameRoom(gameRoomId: number): Promise<G
   return decks || [];
 }
 
-// export async function findGameRoomDecksByLocation(
-//   gameRoomId: number,
-//   location: "deck" | "discard" | "player_hand"
-// ): Promise<GameRoomDeck[]> {
-//   const decks = await db.manyOrNone<GameRoomDeck>(
-//     gameRoomDeckQueries.findByLocation,
-//     [gameRoomId, location]
-//   );
-//   return decks || [];
-// }
-
-
 export async function findGameRoomDecksByLocation(
   gameRoomId: number,
   location: "deck" | "discard" | "player_hand"
-): Promise<(GameRoomDeck & { color: string; value: string })[]> {
-  return await db.manyOrNone(`
-    SELECT grd.*, uc.color, uc.value
-    FROM game_room_decks grd
-    JOIN uno_cards uc ON grd.card_id = uc.id
-    WHERE grd.game_room_id = $1 AND grd.location = $2
-    ORDER BY grd.position_index ASC
-  `, [gameRoomId, location]);
+): Promise<GameRoomDeck[]> {
+  const decks = await db.manyOrNone<GameRoomDeck>(
+    gameRoomDeckQueries.findByLocation,
+    [gameRoomId, location]
+  );
+  return decks || [];
 }
 
-// export async function findGameRoomDecksByPlayer(
-//   gameRoomId: number,
-//   playerId: number
-// ): Promise<GameRoomDeck[]> {
-//   const decks = await db.manyOrNone<GameRoomDeck>(
-//     gameRoomDeckQueries.findByPlayer,
-//     [gameRoomId, playerId]
-//   );
-//   return decks || [];
-// }
 
 export async function findGameRoomDecksByPlayer(
   gameRoomId: number,
   playerId: number
-): Promise<(GameRoomDeck & { color: string; value: string })[]> {
-  return await db.manyOrNone(`
-    SELECT grd.*, uc.color, uc.value
-    FROM game_room_decks grd
-    JOIN uno_cards uc ON grd.card_id = uc.id
-    WHERE grd.game_room_id = $1 AND grd.owner_player_id = $2
-    ORDER BY grd.position_index ASC
-  `, [gameRoomId, playerId]);
+): Promise<GameRoomDeck[] > {
+  const decks = await db.manyOrNone<GameRoomDeck>(
+    gameRoomDeckQueries.findByPlayer,
+    [gameRoomId, playerId]
+  );
+  return decks || [];
 }
+
 
 export async function createGameRoomDeck(data: CreateGameRoomDeckData): Promise<GameRoomDeck> {
   const deck = await db.one<GameRoomDeck>(
