@@ -315,16 +315,18 @@ export async function findGameRoomDecksByLocation(
   return decks || [];
 }
 
+
 export async function findGameRoomDecksByPlayer(
   gameRoomId: number,
   playerId: number
-): Promise<GameRoomDeck[]> {
+): Promise<GameRoomDeck[] > {
   const decks = await db.manyOrNone<GameRoomDeck>(
     gameRoomDeckQueries.findByPlayer,
     [gameRoomId, playerId]
   );
   return decks || [];
 }
+
 
 export async function createGameRoomDeck(data: CreateGameRoomDeckData): Promise<GameRoomDeck> {
   const deck = await db.one<GameRoomDeck>(
@@ -460,3 +462,79 @@ export async function deleteGameResultPlayersByGameResult(gameResultId: number):
   return result.rowCount;
 }
 
+
+export async function startGame(gameRoomId: number){
+  const players = await findGameRoomPlayersByGameRoom(gameRoomId);
+  if (players.length === 0){
+    throw new Error("No players in game room");
+  }
+
+  const allCards = await listUnoCards();
+  const shuffled = allCards.sort(() => Math.random() - 0.5);
+
+  const cardsPerPlayer = 7;
+  let deckIndex = 0;
+
+  /**
+   *  For each player in players select a random card
+   *  from the deck of cards and assign it to the player
+   *  until each player has 7 random cards
+   */
+
+  for (const player of players){
+    for (let i = 0;i < cardsPerPlayer; i++){
+      await createGameRoomDeck({
+        game_room_id: gameRoomId,
+        card_id: shuffled[deckIndex].id,
+        location: "player_hand",
+        owner_player_id: player.id,
+        position_index: i,
+      });
+      deckIndex++
+    }
+  }
+
+  /**
+   *  For the remaining cards in the shuffled deck
+   *  place them in the deck of cards that players
+   *  will pull from
+   */
+
+  for (let i=deckIndex; i < shuffled.length;i++){
+    await createGameRoomDeck({
+      game_room_id:gameRoomId,
+      card_id: shuffled[i].id,
+      location: "deck",
+      position_index: i - deckIndex,
+    });
+  }
+
+  /**
+   *  Add the first discarded card to the discard pile
+   *  this will be the card that the first player will
+   *  try to match with on the very first turn
+   */
+
+  const firstCard = shuffled[deckIndex];
+  await createGameRoomDeck({
+    game_room_id: gameRoomId,
+    card_id: firstCard.id,
+    location: "discard",
+    position_index: 0,
+  });
+
+  /**
+   *  Update game room status from waiting to in progress
+   */
+
+
+  await updateGameRoom(gameRoomId, {
+    status: "in_progress",
+    started_at: new Date(),
+  });
+
+  console.log("[startGame] Game initialized for room", gameRoomId);
+
+  return {message: "Game started successfully"};
+
+}

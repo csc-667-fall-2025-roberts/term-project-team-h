@@ -16,6 +16,8 @@ import {
   deleteWaitingRoom
 } from "../db/waiting_room";
 
+import { startGame } from "@backend/db/game";
+
 export interface WaitRoomSocket extends Socket {
   userId: number;
   username: string;
@@ -153,6 +155,28 @@ export function initializeWaitRoomHandlers(socket: WaitRoomSocket, io: Server): 
     // Notify everyone who was in that waiting room
     io.to(`waiting-room:${roomId}`).emit("waitingRoom:deleted", { roomId });
     io.to(GLOBAL_ROOM).emit(LOBBY_ROOM_DELETED, { roomId });
+  });
+
+
+
+
+  // ---------------------------
+  // WAITING_ROOM_START
+  // ---------------------------
+
+  socket.on(WAITING_ROOM_START, async (data: { roomId: number }) => {
+    const { roomId }= data;
+
+    try {
+      await startGame(roomId);
+
+
+      io.to(`room-${roomId}`).emit(GAME_STARTED,{roomId});
+    }catch (err){
+      console.error("Error starting game [WAITING_ROOM_START]:",err);
+      socket.emit("waitingRoom:error", {message: err});
+    }
+    
   });
 
 }
