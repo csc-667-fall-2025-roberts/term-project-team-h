@@ -310,7 +310,10 @@ body {
 /* INPUT FIELD */
 
 .join-room-body {
+  display: flex;
+  flex-direction: column;
   margin-bottom: 24px;
+  gap: 10px;
 }
 
 .join-room-password-input {
@@ -366,14 +369,14 @@ body {
   transform: translateY(-1px);
 }
 
-.join-room-error {
-  margin-bottom: 12px;
+.password-error {
+  margin: 0px;
   color: #d60000;
-  font-size: 14px;
+  font-size: 18px;
   text-align: center;
 }
 
-.join-room-error.hidden {
+.password-error.hidden {
   display: none;
 }
 
