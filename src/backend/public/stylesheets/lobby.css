@@ -366,6 +366,16 @@ body {
   transform: translateY(-1px);
 }
 
+.join-room-error {
+  margin-bottom: 12px;
+  color: #d60000;
+  font-size: 14px;
+  text-align: center;
+}
+
+.join-room-error.hidden {
+  display: none;
+}
 
 /* CREATE ROOM */
 

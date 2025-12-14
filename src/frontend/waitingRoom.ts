@@ -94,15 +94,17 @@ export function initializeWaitingRoom(): void {
 
     if (startButton && isGameMaster) {
         startButton.addEventListener("click", () => {
-        startButton.disabled = true;
-        socket.emit(WAITING_ROOM_START, { roomId });
+            startButton.disabled = true;
+            socket.emit(WAITING_ROOM_START, { roomId });
         });
     }
 
     if (leaveButton) {
         leaveButton.addEventListener("click", () => {
             console.log("[waiting-room] leaving room", roomId);
-            socket.emit(WAITING_ROOM_LEAVE, { roomId });
+            socket.emit(WAITING_ROOM_LEAVE, { roomId }, () => {
+                window.location.href = "/lobby";
+            });
         });
     }
 
