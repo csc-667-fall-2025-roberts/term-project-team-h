@@ -64,6 +64,10 @@ router.post("/:id/join", async (req, res, next) => {
       return res.status(400).send("Invalid room id");
     }
 
+    // Check for room password input
+    const room = getWaitingRoom(roomId);
+
+
     const userId = req.session.user.id;
 
     // If they're already in the room, just send them there
