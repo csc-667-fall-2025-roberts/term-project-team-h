@@ -5,6 +5,9 @@ import {
   isUserInWaitingRoom,
   addPlayerToWaitingRoom,
 } from "../db/waiting_room";
+import {
+  getLobbyRooms
+} from "../db/lobby"
 
 const router = express.Router();
 
@@ -64,8 +67,21 @@ router.post("/:id/join", async (req, res, next) => {
       return res.status(400).send("Invalid room id");
     }
 
-    // Check for room password input
-    const room = getWaitingRoom(roomId);
+    // Check room password
+    const room = await getWaitingRoom(roomId);
+    if (!room)
+      return res.status(404).send("Room not found");
+    const submittedPassword = (req.body.password || "").trim();
+
+    if (room.password !== null) {
+      if (!submittedPassword || submittedPassword !== room.password) {
+        return res.status(403).render("lobby", {
+          rooms: await getLobbyRooms(),
+          currentUser: req.session.user,
+          joinError: "Incorrect password",
+        });
+      }
+    }
 
 
     const userId = req.session.user.id;
