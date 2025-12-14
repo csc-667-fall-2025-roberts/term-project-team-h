@@ -34,7 +34,10 @@
             <p class="empty-lobby">No games yet. Create one!</p>
           <% } else { %>
             <% rooms.forEach(function (room) { %>
-              <article class="lobby-card">
+              <article class="lobby-card"
+                data-room-id="<%= room.id %>"
+                data-has-password="<%= room.hasPassword %>">
+                
                 <div class="lobby-card-top">
                   <span class="lobby-name">
                     <%= room.hostUsername %>'s Lobby
@@ -52,11 +55,7 @@
                       action="/waiting_room/<%= room.id %>/join"
                       method="POST"
                     >
-                      <% if (room.hasPassword) { %>
-                        <button type="submit" class="join-btn">Join 🔒</button>
-                      <% } else { %>
-                        <button type="submit" class="join-btn">Join</button>
-                      <% } %>
+                    <button type="submit" class="join-btn">Join</button>
                     </form>
                   <% } %>
                 </div>
@@ -89,6 +88,35 @@
       </aside>
     </main>
 
+    <!-- JOIN ROOM PASSWORD MODAL -->
+    <div id="join-room-modal" class="join-room-modal hidden">
+      <div class="join-room-card">
+        <div class="join-room-header">
+          <h2>Enter Room Password</h2>
+        </div>
+        <form id="join-room-form" method="POST">
+          <div class="join-room-body">
+            <input
+              type="password"
+              name="password"
+              id="join-room-password"
+              class="join-room-password-input"
+              placeholder="Password"
+              required
+            />
+          </div>
+          <div class="join-room-footer">
+            <button type="submit" id="join-room-confirm" class="primary-button">
+              Join
+            </button>
+            <button type="button" id="join-room-cancel" class="secondary-button">
+              Cancel
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
     <!-- CREATE ROOM MODAL -->
     <div id="create-room-modal" class="create-room-modal hidden">
       <form action="/lobby/create_game" method="POST" class="page">
@@ -114,20 +142,19 @@
 
           <section class="column">
             <div class="section-label">Password</div>
-            <button
-              class="primary-button wide-button"
-              type="button"
-              id="set-room-password"
-            >
-              Set Room Password
-            </button>
+            <input 
+              type="text"
+              name="password"
+              id="roomPasswordInput"
+              class="create-psw"
+              placeholder="Enter password (optional)"
+            />
           </section>
         </main>
 
         <!-- hidden fields sent to /waiting_room -->
         <input type="hidden" name="title" value="">
         <input type="hidden" name="maxPlayers" id="maxPlayersInput" value="2">
-        <input type="hidden" name="password" id="roomPasswordInput" value="">
 
         <footer class="page-footer">
           <div class="start-wrapper">
@@ -163,7 +190,6 @@
         });
       }
 
-      // max players pills
       const pillButtons = document.querySelectorAll(".pill-button");
       const maxPlayersInput = document.getElementById("maxPlayersInput");
 
@@ -179,19 +205,35 @@
         });
       });
 
-      // password setter
-      const passwordBtn = document.getElementById("set-room-password");
-      const passwordInput = document.getElementById("roomPasswordInput");
+      const joinModal = document.getElementById("join-room-modal");
+      const joinForm = document.getElementById("join-room-form");
+      const joinPasswordInput = document.getElementById("join-room-password");
+      const joinCancelBtn = document.getElementById("join-room-cancel");
 
-      if (passwordBtn && passwordInput) {
-        passwordBtn.addEventListener("click", (e) => {
+      const lobbyJoinForms = document.querySelectorAll(".lobby-card form");
+
+      lobbyJoinForms.forEach((form) => {
+        form.addEventListener("submit", (e) => {
+          const card = form.closest(".lobby-card");
+          if (!card) return;
+          const hasPassword = card.dataset.hasPassword === "true";
+          const roomId = card.dataset.roomId;
+          if (!hasPassword || !roomId) return;
+
           e.preventDefault();
-          const value = window.prompt(
-            "Enter a room password (leave blank for none):",
-            passwordInput.value || ""
-          );
-          if (value === null) return; // user cancelled
-          passwordInput.value = value.trim();
+          if (joinForm && joinModal && joinPasswordInput) {
+            joinPasswordInput.value = "";
+            joinForm.setAttribute("action", `/waiting_room/${roomId}/join`);
+            joinModal.classList.remove("hidden");
+            joinPasswordInput.focus();
+          }
+        });
+      });
+
+      if (joinCancelBtn && joinModal && joinPasswordInput) {
+        joinCancelBtn.addEventListener("click", () => {
+          joinPasswordInput.value = "";
+          joinModal.classList.add("hidden");
         });
       }
     </script>
