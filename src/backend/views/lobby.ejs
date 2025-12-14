@@ -114,20 +114,19 @@
 
           <section class="column">
             <div class="section-label">Password</div>
-            <button
-              class="primary-button wide-button"
-              type="button"
-              id="set-room-password"
-            >
-              Set Room Password
-            </button>
+            <input 
+              type="text"
+              name="password"
+              id="roomPasswordInput"
+              class="create-psw"
+              placeholder="Enter password (optional)"
+            />
           </section>
         </main>
 
         <!-- hidden fields sent to /waiting_room -->
         <input type="hidden" name="title" value="">
         <input type="hidden" name="maxPlayers" id="maxPlayersInput" value="2">
-        <input type="hidden" name="password" id="roomPasswordInput" value="">
 
         <footer class="page-footer">
           <div class="start-wrapper">
@@ -178,22 +177,6 @@
           }
         });
       });
-
-      // password setter
-      const passwordBtn = document.getElementById("set-room-password");
-      const passwordInput = document.getElementById("roomPasswordInput");
-
-      if (passwordBtn && passwordInput) {
-        passwordBtn.addEventListener("click", (e) => {
-          e.preventDefault();
-          const value = window.prompt(
-            "Enter a room password (leave blank for none):",
-            passwordInput.value || ""
-          );
-          if (value === null) return; // user cancelled
-          passwordInput.value = value.trim();
-        });
-      }
     </script>
 
     <script src="/js/bundle.js"></script>

@@ -256,7 +256,7 @@ body {
   color: inherit;
 }
 
-/* CREATE ROOM MODAL */
+/* CREATE ROOM */
 
 .create-room-modal {
   --border-color: #222;
@@ -395,4 +395,27 @@ body {
 .create-room-modal .secondary-button:hover {
   background-color: #f3f3f3;
   transform: translateY(-1px);
+}
+
+.create-room-modal .pill-button.active {
+  background-color: var(--accent);
+  color: #ffffff;
+  border-color: var(--accent);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+  transform: translateY(-1px);
+}
+
+.create-room-modal .create-psw {
+  padding: 10px 14px;
+  font-size: 14px;
+  border: 2px solid var(--border-color);
+  border-radius: 8px;
+  outline: none;
+  background: #fff;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.create-room-modal .create-psw:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(0,0,0,0.15);
 }
