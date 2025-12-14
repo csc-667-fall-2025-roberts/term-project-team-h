@@ -197,6 +197,7 @@ body {
   border: 2px solid var(--border);
   border-radius: 4px;
   background: #fff;
+  height: 500px;
 }
 
 .chat-header {
@@ -207,7 +208,8 @@ body {
 }
 
 .chat-messages {
-  flex: 1;
+  flex: 1 1 auto;
+  min-height: 0;
   padding: 10px 12px;
   overflow-y: auto;
   font-size: 0.9rem;
@@ -222,6 +224,7 @@ body {
 }
 
 .chat-input {
+  flex: 0 0 auto;
   display: flex;
   border-top: 2px solid var(--border);
 }
