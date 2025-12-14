@@ -83,7 +83,6 @@ router.post("/:id/join", async (req, res, next) => {
       }
     }
 
-
     const userId = req.session.user.id;
 
     // If they're already in the room, just send them there

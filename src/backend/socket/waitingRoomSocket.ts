@@ -71,7 +71,7 @@ export function initializeWaitRoomHandlers(socket: WaitRoomSocket, io: Server): 
   // ---------------------------
   // WAITING_ROOM_LEAVE
   // ---------------------------
-  socket.on(WAITING_ROOM_LEAVE, async (data: { roomId: number }) => {
+  socket.on(WAITING_ROOM_LEAVE, async (data: { roomId: number }, act?: () => void) => {
     const { roomId } = data;
 
     if (!Number.isFinite(roomId)) {
@@ -107,6 +107,10 @@ export function initializeWaitRoomHandlers(socket: WaitRoomSocket, io: Server): 
       roomId,
       players,
     });
+
+    if (typeof act === "function") {
+      act();
+    }
   });
 
 
