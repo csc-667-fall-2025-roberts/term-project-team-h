@@ -4,6 +4,7 @@ import { SessionData } from "express-session";
 import { RequestHandler } from "express";
 import { initializeChatHandlers, ChatSocket } from "./chat";
 import { initializeWaitRoomHandlers, WaitRoomSocket } from "./waitingRoomSocket";
+import { initializeGameHandlers, GameSocket } from "./gameSocket";
 
 export function initializeSockets(
   httpServer: HTTPServer,
@@ -41,6 +42,7 @@ export function initializeSockets(
 
     initializeChatHandlers(socket as ChatSocket);
     initializeWaitRoomHandlers(socket as WaitRoomSocket, io);
+    initializeGameHandlers(socket as GameSocket, io);
 
     socket.on("disconnect", () => {
       console.log(`Socket disconnected for user ${socket.username} (ID: ${socket.userId})`);

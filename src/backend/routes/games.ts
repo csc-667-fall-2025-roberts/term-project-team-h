@@ -5,7 +5,8 @@ import { requireUser } from "../middleware";
 
 import db from "../db/connection";
 import { findGameRoomById } from "@backend/db/lobby";
-import { findGameRoomDecksByLocation, findGameRoomDecksByPlayer, findGameRoomPlayersByGameRoom, findUnoCardById } from "@backend/db/game";
+import { createGameTurn, drawTopDeckCard, findGameRoomDecksByLocation, findGameRoomDecksByPlayer, findGameRoomPlayersByGameRoom, findUnoCardById, giveCardToPlayer, playCard, getTopDiscardCard, GameRoomPlayerWithUsername } from "@backend/db/game";
+import { nextTick } from "process";
 
 
 
@@ -33,11 +34,46 @@ router.get("/:id", requireUser, async (req, res, next) => {
 
     const me = players.find((p) => Number(p.user_id) === userId);
 
-    
-
     if (!me){
       return res.redirect("/lobby");
     }
+
+    /**
+     *  For displaying other players in order
+     */
+
+    const sortedPlayers = players.sort((a,b) => (a.player_order ?? 0) - (b.player_order ?? 0));
+    
+    const myIndex = sortedPlayers.findIndex(p => p.id === me.id);
+
+    const totalPlayers = sortedPlayers.length;
+    type PlayerOrNull = GameRoomPlayerWithUsername | null;
+    let positions: {
+      top: PlayerOrNull, 
+      left: PlayerOrNull,
+      right: PlayerOrNull,
+      bottom: GameRoomPlayerWithUsername,
+    } = {
+      top: null,
+      left: null,
+      right: null,
+      bottom: me,
+    };
+
+    if (totalPlayers === 2){
+      const topIndex = (myIndex + 1) % totalPlayers;
+      positions.top = sortedPlayers[topIndex];
+    
+    }else if (totalPlayers === 3){
+        positions.right = sortedPlayers[(myIndex + 1) % totalPlayers];
+        positions.left = sortedPlayers[(myIndex + 2) % totalPlayers];
+    
+    }else if (totalPlayers === 4){
+        positions.right = sortedPlayers[(myIndex + 1) % totalPlayers];
+        positions.top = sortedPlayers[(myIndex + 2) % totalPlayers];
+        positions.left = sortedPlayers[(myIndex + 3) % totalPlayers];
+    }
+
 
     // To display current players deck 
     const myCards = await findGameRoomDecksByPlayer(gameId, me.id);
@@ -51,11 +87,11 @@ router.get("/:id", requireUser, async (req, res, next) => {
     ? discardPile[discardPile.length - 1]
     : null;
 
-    
     res.render("game", {
       gameId,
       room,
-      players,
+      players: sortedPlayers,
+      positions,
       me,
       myCards,
       topDiscard,
@@ -67,6 +103,7 @@ router.get("/:id", requireUser, async (req, res, next) => {
   }
 
 });
+
 
 export { router as gamesRouter} ;
 

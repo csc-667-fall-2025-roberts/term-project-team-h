@@ -5,38 +5,37 @@
         <title>UNO Lobby</title>  
         <link rel="stylesheet" href="/stylesheets/game.css">
     </head>
-    <body>
+    <body data-game-id="<%= gameId %>">
 
         <div class="table">
-            <div class="player player-top">
-                <img src="/images/cards/Deck.png" class = "top-player-card">
-                <img src="/images/cards/Deck.png" class = "top-player-card">
-                <img src="/images/cards/Deck.png" class = "top-player-card">
-                <img src="/images/cards/Deck.png" class = "top-player-card">
-                <img src="/images/cards/Deck.png" class = "top-player-card">
-                <img src="/images/cards/Deck.png" class = "top-player-card">
-                <img src="/images/cards/Deck.png" class = "top-player-card">
-                <img src="/images/cards/Deck.png" class = "top-player-card">
-                <img src="/images/cards/Deck.png" class = "top-player-card">
-                <img src="/images/cards/Deck.png" class = "top-player-card">
-                <img src="/images/cards/Deck.png" class = "top-player-card">
-                <h2 class="player-name">Player Username</h2>
-                <h4 class="card-count">Card Count : 11</h4>
-            </div>
 
-            <div class="player player-left">
-                <h2 class="player-name">Player Username</h2>
-                <h4 class="card-count">Card Count : 3</h4>
-                <img src="/images/cards/Deck.png" class = "left-player-card">
-                <img src="/images/cards/Deck.png" class = "left-player-card">
-                <img src="/images/cards/Deck.png" class = "left-player-card">
-            </div>
+
+            <% if (positions.top) { %>
+                <div class="player player-top">
+                <% for (let i = 0; i < positions.top.cards_in_hand; i++) { %>
+                    <img src="/images/cards/Deck.png" class="top-player-card">
+                <% } %>
+                <h2 class="player-name"><%= positions.top.username %></h2>
+                <h4 class="card-count">Card Count: <%= positions.top.cards_in_hand %></h4>
+                </div>
+            <% } %>
+
+
+            <% if (positions.left) { %>
+                <div class="player player-left">
+                <h2 class="player-name"><%= positions.left.username %></h2>
+                <h4 class="card-count">Card Count: <%= positions.left.cards_in_hand %></h4>
+                <% for (let i = 0; i < positions.left.cards_in_hand; i++) { %>
+                    <img src="/images/cards/Deck.png" class="left-player-card">
+                <% } %>
+                </div>
+            <% } %>
 
             <div class="center-box">
                 <div class="draw-card">
                     <h4 class="draw-text">Draw Card</h4>
-                    <a class="draw">
-                        <img src="/images/cards/Deck.png" class="card card-1">
+                    <a class="draw" >
+                        <img src="/images/cards/Deck.png" class="card card-1" id="draw-pile">
                     </a>
                 </div>
 
@@ -53,42 +52,18 @@
 
             </div>
 
-            <div class="player player-right">
-                <h2 class="player-name">Player Username</h2>
-                <h4 class="card-count">Card Count : 7</h4>
-                <img src="/images/cards/Deck.png" class = "right-player-card">
-                <img src="/images/cards/Deck.png" class = "right-player-card">
-                <img src="/images/cards/Deck.png" class = "right-player-card">
-                <img src="/images/cards/Deck.png" class = "right-player-card">
-                <img src="/images/cards/Deck.png" class = "right-player-card">
-                <img src="/images/cards/Deck.png" class = "right-player-card">
-                <img src="/images/cards/Deck.png" class = "right-player-card">
-            </div>
+
+            <% if (positions.right) { %>
+                <div class="player player-right">
+                <h2 class="player-name"><%= positions.right.username %></h2>
+                <h4 class="card-count">Card Count: <%= positions.right.cards_in_hand %></h4>
+                <% for (let i = 0; i < positions.right.cards_in_hand; i++) { %>
+                <img src="/images/cards/Deck.png" class="right-player-card">
+                <% } %>
+                </div>
+             <% } %>
 
             <div class="player player-bottom">
-                <!-- <h2 class="player-name">Player Username</h2>
-                <h4 class="card-count">Card Count : 7</h4>
-                <a class="player-card">
-                    <img src="/images/cards/Red_1.png" class = "bottom-player-card">
-                </a>
-                <a class="player-card">
-                <img src="/images/cards/Red_4.png" class = "bottom-player-card">
-                </a>
-                <a class="player-card">
-                <img src="/images/cards/Wild.png" class = "bottom-player-card">
-                </a>
-                <a class="player-card">
-                    <img src="/images/cards/Red_1.png" class = "bottom-player-card">
-                </a>
-                <a class="player-card">
-                    <img src="/images/cards/Red_1.png" class = "bottom-player-card">
-                </a>
-                <a class="player-card">
-                    <img src="/images/cards/Red_1.png" class = "bottom-player-card">
-                </a>
-                <a class="player-card">
-                    <img src="/images/cards/Red_1.png" class = "bottom-player-card">
-                </a> -->
 
                 <h2 class = "player-name"> <%= me.username %></h2>
                 <h4 class="card-count">Card Count: <%= myCards.length %></h4>
@@ -151,6 +126,8 @@
             }
         });
       </script>
+
+
 
       <script src="/js/bundle.js"></script>
     

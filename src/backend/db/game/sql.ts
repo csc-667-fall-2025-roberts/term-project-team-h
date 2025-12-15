@@ -81,6 +81,7 @@ export const gameRoomDeckQueries = {
     JOIN uno_cards uc ON grd.card_id = uc.id
     WHERE grd.game_room_id = $1
       AND grd.owner_player_id = $2
+      AND grd.location = 'player_hand'
     ORDER BY grd.position_index ASC
   `,
   create: `
@@ -98,6 +99,86 @@ export const gameRoomDeckQueries = {
   `,
   delete: "DELETE FROM game_room_decks WHERE id = $1",
   deleteByGameRoom: "DELETE FROM game_room_decks WHERE game_room_id = $1",
+  
+  /**
+   *  Validates card ownership
+   */
+  canPlayCard:`
+    SELECT grd.*
+    FROM game_room_decks grd
+    WHERE grd.id = $1
+      AND grd.game_room_id = $2
+      AND grd.owner_player_id = $3
+      AND grd.location = 'player_hand'
+  `,
+  /**
+   *  Moves a card to the discard pile
+   */
+
+  moveCardToDiscard:`
+    UPDATE game_room_decks
+    SET location = 'discard',
+      owner_player_id = NULL,
+      position_index = $2
+    WHERE id = $1
+    RETURNING *
+  `,
+
+  /**
+   *  Used for validating if a play is legal by comparing the card
+   *  to the top discarded card
+   */
+
+  getTopDiscard:`
+    SELECT grd.*, uc.color, uc.value
+    FROM game_room_decks grd
+    JOIN uno_cards uc ON grd.card_id = uc.id
+    WHERE grd.game_room_id = $1
+      AND grd.location = 'discard'
+    ORDER BY grd.position_index DESC
+    LIMIT 1
+  `,
+
+  /**
+   *  Used for drawing a card from the deck
+   */
+
+  getTopDeckCard:`
+    SELECT *
+    FROM game_room_decks
+    WHERE game_room_id = $1
+      AND location = 'deck'
+    ORDER BY position_index ASC
+    LIMIT 1
+  `,
+
+  moveCardToPlayerHand:`
+    UPDATE game_room_decks
+    SET location = 'player_hand',
+      owner_player_id = $2,
+      position_index = $3
+    WHERE id = $1
+    RETURNING *
+  `,
+
+  /**
+   *  increments the number of cards in hand
+   */
+
+  incrementPlayerHandCount:`
+    UPDATE game_room_players
+    SET cards_in_hand = cards_in_hand + 1
+    WHERE id = $1
+    RETURNING *
+  `,
+
+  decrementPlayerHandCount: `
+    UPDATE game_room_players
+    SET cards_in_hand = cards_in_hand - 1
+    WHERE id = $1
+    RETURNING *
+  `,
+
 };
 
 export const gameTurnQueries = {

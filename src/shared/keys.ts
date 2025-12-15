@@ -10,6 +10,12 @@ export const PLAYER_JOINED = "player:joined";
 export const GAME_STARTED = "game:started";
 export const ASK_RESULT = "game:ask-result";
 
+export const GAME_DRAW = "game:draw";
+export const GAME_PLAY = "game:play";
+export const GAME_ERROR = "game:error";
+export const GAME_STATE = "game:state";
+export const GAME_JOINED = "game:joined"
+
 // Wait Room Events
 export const WAITING_ROOM_JOINED = "waitingRoom:joined";
 export const WAITING_ROOM_PLAYERS = "waitingRoom:players";
