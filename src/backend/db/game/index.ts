@@ -336,7 +336,7 @@ export async function createGameRoomDeck(data: CreateGameRoomDeckData): Promise<
       data.card_id,
       data.location,
       data.owner_player_id || null,
-      data.position_index || null,
+      data.position_index ?? null,
     ]
   );
   return deck;
@@ -462,6 +462,9 @@ export async function deleteGameResultPlayersByGameResult(gameResultId: number):
   return result.rowCount;
 }
 
+/**
+ *  Function for starting the game
+ */
 
 export async function startGame(gameRoomId: number){
   const players = await findGameRoomPlayersByGameRoom(gameRoomId);
@@ -492,7 +495,12 @@ export async function startGame(gameRoomId: number){
       });
       deckIndex++
     }
+    await updateGameRoomPlayer(player.id, {
+      cards_in_hand: cardsPerPlayer
+    });
   }
+
+  
 
   /**
    *  For the remaining cards in the shuffled deck
@@ -500,7 +508,7 @@ export async function startGame(gameRoomId: number){
    *  will pull from
    */
 
-  for (let i=deckIndex; i < shuffled.length;i++){
+  for (let i=deckIndex + 1; i < shuffled.length;i++){
     await createGameRoomDeck({
       game_room_id:gameRoomId,
       card_id: shuffled[i].id,
@@ -515,10 +523,10 @@ export async function startGame(gameRoomId: number){
    *  try to match with on the very first turn
    */
 
-  const firstCard = shuffled[deckIndex];
+  // const firstCard = shuffled[deckIndex];
   await createGameRoomDeck({
     game_room_id: gameRoomId,
-    card_id: firstCard.id,
+    card_id: shuffled[deckIndex].id,
     location: "discard",
     position_index: 0,
   });
@@ -538,3 +546,394 @@ export async function startGame(gameRoomId: number){
   return {message: "Game started successfully"};
 
 }
+
+
+/**
+ *  Function to get the top card in the discard pile
+ */
+
+export async function getTopDiscardCard(
+  gameRoomId: number
+): Promise<GameRoomDeck | null> {
+  const cards = await db.oneOrNone<GameRoomDeck>(
+    gameRoomDeckQueries.getTopDiscard,
+    [gameRoomId]
+  );
+  return cards;
+}
+
+/**
+ *  Function to draw the top card in the deck
+ */
+
+export async function drawTopDeckCard(
+  gameRoomId: number
+): Promise<GameRoomDeck | null> {
+  const card = await db.oneOrNone<GameRoomDeck>(
+    gameRoomDeckQueries.getTopDeckCard,
+    [gameRoomId]
+  );
+  return card;
+}
+
+/**
+ *  Function to get a players hand
+ */
+
+export async function getPlayerHand(
+  gameRoomId: number,
+  playerId: number
+): Promise<GameRoomDeck[]> {
+  const hand = await findGameRoomDecksByPlayer(gameRoomId, playerId);
+  return hand;
+}
+
+/**
+ *  Function to give a card to a player
+ */
+
+export async function giveCardToPlayer(
+  deckCardId: number,
+  playerId: number
+): Promise<GameRoomDeck | null> {
+  const updated = await updateGameRoomDeck(deckCardId, {
+    location: "player_hand",
+    owner_player_id: playerId,
+    position_index: null,
+  });
+  return updated;
+}
+
+/**
+ *  Function to give the top card in the deck
+ *  to the player that is drawing the card
+ */
+
+export async function drawCardForPlayer(
+  gameRoomId: number,
+  userId: number
+) {
+  const player = await findGameRoomPlayerByGameRoomAndUser(gameRoomId, userId);
+  if (!player) {
+    throw new Error("Player not found in game");
+  }
+
+  const currentPlayer = await getCurrentPlayer(gameRoomId);
+  if (!currentPlayer || currentPlayer.id !== player.id) {
+    throw new Error("It's not your turn!");
+  }
+
+  const topCard = await drawTopDeckCard(gameRoomId);
+  if (!topCard) {
+    throw new Error("Deck is empty");
+  }
+
+  await updateGameRoomDeck(topCard.id, {
+    location: "player_hand",
+    owner_player_id: player.id,
+    position_index: null,
+  });
+
+  await updateGameRoomPlayer(player.id, {
+    cards_in_hand: player.cards_in_hand + 1
+  });
+
+
+  const canPlay = await canPlayCard(gameRoomId, topCard.card_id);
+
+  if (canPlay){
+
+    const discardPile = await findGameRoomDecksByLocation(gameRoomId, "discard");
+    const nextPosition = discardPile.length;
+
+    await updateGameRoomDeck(topCard.id, {
+      location: "discard",
+      owner_player_id: null,
+      position_index: nextPosition,
+    });
+
+    await updateGameRoomPlayer(player.id, {
+      cards_in_hand: player.cards_in_hand - 1
+    });
+
+    await createGameTurn({
+      game_room_id: gameRoomId,
+      player_id: player.id,
+      card_played_id: topCard.card_id,
+      action_type: "play",
+    });
+
+  }else {
+    await createGameTurn({
+      game_room_id: gameRoomId,
+      player_id: player.id,
+      action_type: "draw",
+    });
+  }
+
+  
+}
+
+/**
+ *  Function to play a card
+ */
+
+export async function playCard(
+  gameRoomId: number,
+  userId: number,
+  deckCardId: number
+) {
+  const player = await findGameRoomPlayerByGameRoomAndUser(gameRoomId, userId);
+  if (!player) {
+    throw new Error("Player not found");
+  }
+
+  console.log(`[playCard] Player ID: ${player.id}, User ID: ${userId}`);
+
+  const currentPlayer = await getCurrentPlayer(gameRoomId);
+  if (!currentPlayer || currentPlayer.id !== player.id) {
+    throw new Error("It's not your turn!");
+  }
+
+  const deckCard = await findGameRoomDeckById(deckCardId);
+  
+
+  if (!deckCard) {
+    throw new Error("Card not found");
+  }
+
+  console.log("[playCard] Deck Card:", deckCard);
+
+  if (Number(deckCard.owner_player_id) !== player.id) {
+    throw new Error(
+      `You do not own this card. Card owner: ${deckCard.owner_player_id}, You are: ${player.id}`
+    );
+  }
+
+
+  const isValidPlay = await canPlayCard(gameRoomId, deckCard.card_id);
+  if (!isValidPlay) {
+    throw new Error("This card cannot be played! Color or number must match.");
+  }
+
+  const discardPile = await findGameRoomDecksByLocation(gameRoomId, "discard");
+  const nextPosition = discardPile.length;
+  
+
+  await updateGameRoomDeck(deckCardId, {
+    location: "discard",
+    owner_player_id: null,
+    position_index: nextPosition,
+  });
+
+  await updateGameRoomPlayer(player.id, {
+    cards_in_hand: player.cards_in_hand - 1
+  });
+
+
+  const unoCard = await findUnoCardById(deckCard.card_id);
+  if (!unoCard){
+    throw new Error("Card not found");
+  }
+
+  if (unoCard.value === "draw_two"){
+    const nextPlayer = await getNextPlayer(gameRoomId,player.id);
+    if (!nextPlayer) throw new Error("Next player not found");
+
+    await applyDrawTwo(gameRoomId, nextPlayer.id);
+
+    await createGameTurn({
+      game_room_id: gameRoomId,
+      player_id: player.id,
+      card_played_id: deckCard.card_id,
+      action_type: "draw_two",
+    });
+
+    await createGameTurn({
+      game_room_id: gameRoomId,
+      player_id: nextPlayer.id,
+      action_type: "skip",
+    });
+
+    return;
+  }
+
+  if (unoCard.value === "skip") {
+    const skippedPlayer = await getNextPlayer(gameRoomId, player.id);
+    if (!skippedPlayer) {
+      throw new Error("Skipped player not found");
+    }
+
+  
+    await createGameTurn({
+      game_room_id: gameRoomId,
+      player_id: player.id,
+      card_played_id: deckCard.card_id,
+      action_type: "play", 
+    });
+
+ 
+    await createGameTurn({
+      game_room_id: gameRoomId,
+      player_id: skippedPlayer.id,
+      action_type: "skip",
+    });
+
+    return;
+  }
+
+
+  if (unoCard.value === "wild_draw_four"){
+    const nextPlayer = await getNextPlayer(gameRoomId, player.id);
+    if (!nextPlayer) throw new Error("Next player not found");
+
+    await applyDrawFour(gameRoomId,nextPlayer.id);
+
+    await createGameTurn({
+      game_room_id: gameRoomId,
+      player_id: player.id,
+      card_played_id: deckCard.card_id,
+      action_type: "wild",
+    });
+
+    await createGameTurn({
+      game_room_id: gameRoomId,
+      player_id: nextPlayer.id,
+      action_type: "skip",
+    });
+
+    return;
+  }
+
+  await createGameTurn({
+    game_room_id: gameRoomId,
+    player_id: player.id,
+    card_played_id: deckCard.card_id,
+    action_type: "play",
+  });
+}
+
+/**
+ *  Function to enforce players turns
+ */
+
+export async function getCurrentPlayer(
+  gameRoomId: number
+): Promise<GameRoomPlayer | null> {
+  const lastTurn = await getLatestGameTurn(gameRoomId);
+
+  if (!lastTurn) {
+    const players = await findGameRoomPlayersByGameRoom(gameRoomId);
+    return players.sort((a, b) => (a.player_order ?? 0) - (b.player_order ?? 0))[0] ?? null;
+  }
+  const lastPlayer = await findGameRoomPlayerById(lastTurn.player_id);
+  if (!lastPlayer) return null;
+
+  return getNextPlayer(gameRoomId, lastPlayer.id);
+}
+
+/**
+ *  Function to end a players turn
+ */
+
+export async function getNextPlayer(
+  gameRoomId: number,
+  currentPlayerId: number
+): Promise<GameRoomPlayer | null> {
+  const players = await findGameRoomPlayersByGameRoom(gameRoomId);
+
+  const ordered = players.sort(
+    (a, b) => (a.player_order ?? 0) - (b.player_order ?? 0)
+  );
+
+  const index = ordered.findIndex(p => p.id === currentPlayerId);
+  if (index === -1) return null;
+
+  return ordered[(index + 1) % ordered.length];
+}
+
+
+/**
+ * Function to validate if a card can be played
+ */
+export async function canPlayCard(
+  gameRoomId: number,
+  cardId: number
+): Promise<boolean> {
+  // Get the card being played
+  const playedCard = await findUnoCardById(cardId);
+  if (!playedCard) {
+    return false;
+  }
+
+  // Wild cards can always be played
+  if (playedCard.color === "wild") {
+    return true;
+  }
+
+  // Get the top discard card
+  const topDiscard = await getTopDiscardCard(gameRoomId);
+  if (!topDiscard) {
+    // If no discard card exists, any card can be played
+    return true;
+  }
+
+  // Get the full card info for top discard
+  const topDiscardCard = await findUnoCardById(topDiscard.card_id);
+  if (!topDiscardCard) {
+    return false;
+  }
+
+  if (topDiscardCard.color === "wild") {
+    return true;
+  }
+
+  // Check if colors match OR values match
+  const colorMatches = playedCard.color === topDiscardCard.color;
+  const valueMatches = playedCard.value === topDiscardCard.value;
+
+  return colorMatches || valueMatches;
+}
+
+
+async function applyDrawTwo(gameRoomId: number, targetPlayerId: number) {
+  for (let i = 0; i < 2; i++) {
+    const card = await drawTopDeckCard(gameRoomId);
+    if (!card) throw new Error("Deck is empty");
+
+    await updateGameRoomDeck(card.id, {
+      location: "player_hand",
+      owner_player_id: targetPlayerId,
+      position_index: null,
+    });
+  }
+
+  const targetPlayer = await findGameRoomPlayerById(targetPlayerId);
+  if (targetPlayer) {
+    await updateGameRoomPlayer(targetPlayer.id, {
+      cards_in_hand: targetPlayer.cards_in_hand + 2,
+    });
+  }
+}
+
+async function applyDrawFour(gameRoomId: number, targetPlayerId: number){
+    for (let i = 0; i < 4; i++){
+      const card = await drawTopDeckCard(gameRoomId);
+      if (!card) throw new Error("Deck is empty");
+
+      await updateGameRoomDeck(card.id, {
+        location: "player_hand",
+        owner_player_id: targetPlayerId,
+        position_index: null,
+      });
+
+    }
+
+    const targetPlayer = await findGameRoomPlayerById(targetPlayerId);
+    if (targetPlayer){
+      await updateGameRoomPlayer(targetPlayer.id,{
+        cards_in_hand: targetPlayer.cards_in_hand + 4,
+      });
+    }
+}
+

@@ -3,6 +3,8 @@ import { GLOBAL_ROOM } from "@shared/keys";
 import { initializeWaitingRoom } from "./waitingRoom";
 import { initializeLobbyPage } from "./lobby";
 
+import { initializeGame } from "./game";
+
 declare global {
   interface Window {
     ChatManager: typeof ChatManager;
@@ -76,6 +78,7 @@ function bootstrap() {
   initializeChat();
   initializeWaitingRoom();
   initializeLobbyPage();
+  initializeGame();
 }
 
 if (document.readyState === "loading") {
