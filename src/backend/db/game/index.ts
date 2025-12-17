@@ -628,15 +628,22 @@ export async function drawCardForPlayer(
     throw new Error("Deck is empty");
   }
 
+  const cardsInHand = await findGameRoomDecksByPlayer(gameRoomId, player.id);
+  const nextHandPosition =
+  cardsInHand.length === 0
+    ? 0
+    : Math.max(
+        ...cardsInHand
+          .map(c => c.position_index)
+          .filter((p): p is number => p !== null)
+      ) + 1;
+
   await updateGameRoomDeck(topCard.id, {
     location: "player_hand",
     owner_player_id: player.id,
-    position_index: null,
+    position_index: nextHandPosition,
   });
 
-  await updateGameRoomPlayer(player.id, {
-    cards_in_hand: player.cards_in_hand + 1
-  });
 
 
   const canPlay = await canPlayCard(gameRoomId, topCard.card_id);
@@ -646,15 +653,13 @@ export async function drawCardForPlayer(
     const discardPile = await findGameRoomDecksByLocation(gameRoomId, "discard");
     const nextPosition = discardPile.length;
 
+
     await updateGameRoomDeck(topCard.id, {
       location: "discard",
       owner_player_id: null,
       position_index: nextPosition,
     });
 
-    await updateGameRoomPlayer(player.id, {
-      cards_in_hand: player.cards_in_hand - 1
-    });
 
     await createGameTurn({
       game_room_id: gameRoomId,
@@ -664,6 +669,11 @@ export async function drawCardForPlayer(
     });
 
   }else {
+
+    await updateGameRoomPlayer(player.id, {
+      cards_in_hand: player.cards_in_hand + 1
+    });
+
     await createGameTurn({
       game_room_id: gameRoomId,
       player_id: player.id,

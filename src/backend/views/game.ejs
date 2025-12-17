@@ -11,7 +11,7 @@
 
 
             <% if (positions.top) { %>
-                <div class="player player-top">
+                <div class="player player-top <%= currentPlayer && positions.right?.id === currentPlayer.id ? 'my-turn' : '' %>">
                 <% for (let i = 0; i < positions.top.cards_in_hand; i++) { %>
                     <img src="/images/cards/Deck.png" class="top-player-card">
                 <% } %>
@@ -22,7 +22,7 @@
 
 
             <% if (positions.left) { %>
-                <div class="player player-left">
+                <div class="player player-left <%= currentPlayer && positions.left?.id === currentPlayer.id ? 'my-turn' : '' %>">
                 <h2 class="player-name"><%= positions.left.username %></h2>
                 <h4 class="card-count">Card Count: <%= positions.left.cards_in_hand %></h4>
                 <% for (let i = 0; i < positions.left.cards_in_hand; i++) { %>
@@ -54,7 +54,7 @@
 
 
             <% if (positions.right) { %>
-                <div class="player player-right">
+                <div class="player player-right <%= currentPlayer && positions.right?.id === currentPlayer.id ? 'my-turn' : '' %>">
                 <h2 class="player-name"><%= positions.right.username %></h2>
                 <h4 class="card-count">Card Count: <%= positions.right.cards_in_hand %></h4>
                 <% for (let i = 0; i < positions.right.cards_in_hand; i++) { %>
@@ -63,11 +63,13 @@
                 </div>
              <% } %>
 
-            <div class="player player-bottom">
+             <% const isMyTurn = currentPlayer && currentPlayer.id === me.id; %>
+            <div class="player player-bottom <%= isMyTurn ? 'my-turn' : '' %>">
 
-                <h2 class = "player-name"> <%= me.username %></h2>
-                <h4 class="card-count">Card Count: <%= myCards.length %></h4>
-
+                      <h2 class = "player-name"> <%= me.username %></h2>
+                      <h4 class="card-count">Card Count: <%= myCards.length %></h4>
+ 
+              
                 <% myCards.forEach(card => { %>
                     <img src="/images/cards/<%= card.color.charAt(0).toUpperCase() + card.color.slice(1) %>_<%= card.value %>.png"
                          class="bottom-player-card"
