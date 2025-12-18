@@ -5,7 +5,7 @@ import { requireUser } from "../middleware";
 
 import db from "../db/connection";
 import { findGameRoomById } from "@backend/db/lobby";
-import { createGameTurn, drawTopDeckCard, findGameRoomDecksByLocation, findGameRoomDecksByPlayer, findGameRoomPlayersByGameRoom, findUnoCardById, giveCardToPlayer, playCard, getTopDiscardCard, GameRoomPlayerWithUsername } from "@backend/db/game";
+import { createGameTurn, drawTopDeckCard, findGameRoomDecksByLocation, findGameRoomDecksByPlayer, findGameRoomPlayersByGameRoom, findUnoCardById, giveCardToPlayer, playCard, getTopDiscardCard, GameRoomPlayerWithUsername, getCurrentPlayer } from "@backend/db/game";
 import { nextTick } from "process";
 
 
@@ -81,6 +81,11 @@ router.get("/:id", requireUser, async (req, res, next) => {
 
     // To display the top card in the discard pile
     const discardPile = await findGameRoomDecksByLocation(gameId,"discard");
+
+    // To get the current player for turn displaying 
+    const currentPlayer = await getCurrentPlayer(gameId);
+
+    // const playerCards = await findGameRoomDecksByLocation(gameId,id);
     
     const topDiscard =
     discardPile.length > 0
@@ -95,6 +100,7 @@ router.get("/:id", requireUser, async (req, res, next) => {
       me,
       myCards,
       topDiscard,
+      currentPlayer,
     });
     
   
