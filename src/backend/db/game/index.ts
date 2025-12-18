@@ -151,8 +151,8 @@ export async function findGameRoomsByStatus(
   return rooms || [];
 }
 
-export async function findGameRoomsByCreator(userId: number): Promise<GameRoom[]> {
-  const rooms = await db.manyOrNone<GameRoom>(gameRoomQueries.findByCreator, [userId]);
+export async function findGameRoomsByHost(userId: number): Promise<GameRoom[]> {
+  const rooms = await db.manyOrNone<GameRoom>(gameRoomQueries.findByHost, [userId]);
   return rooms || [];
 }
 

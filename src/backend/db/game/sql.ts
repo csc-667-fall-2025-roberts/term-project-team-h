@@ -5,7 +5,7 @@
 export const gameRoomQueries = {
   findById: "SELECT * FROM game_rooms WHERE id = $1",
   findByStatus: "SELECT * FROM game_rooms WHERE status = $1 ORDER BY created_at DESC",
-  findByCreator: "SELECT * FROM game_rooms WHERE created_by = $1 ORDER BY created_at DESC",
+  findByHost: "SELECT * FROM game_rooms WHERE created_by = $1 ORDER BY created_at DESC",
   create: `
     INSERT INTO game_rooms (title, max_players, password, status, created_by)
     VALUES ($1, $2, $3, $4, $5)
