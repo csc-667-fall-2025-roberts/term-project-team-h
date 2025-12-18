@@ -8,8 +8,6 @@
     <body data-game-id="<%= gameId %>">
 
         <div class="table">
-
-
             <% if (positions.top) { %>
                 <div class="player player-top <%= currentPlayer && positions.right?.id === currentPlayer.id ? 'my-turn' : '' %>">
                 <% for (let i = 0; i < positions.top.cards_in_hand; i++) { %>
@@ -34,24 +32,19 @@
             <div class="center-box">
                 <div class="draw-card">
                     <h4 class="draw-text">Draw Card</h4>
-                    <a class="draw" >
+                    <a class="draw">
                         <img src="/images/cards/Deck.png" class="card card-1" id="draw-pile">
                     </a>
                 </div>
-
 
                 <% if (topDiscard) { %>
                     <img src="/images/cards/<%= topDiscard.color.charAt(0).toUpperCase() + topDiscard.color.slice(1) %>_<%= topDiscard.value %>.png" 
                          class="card card-2"
                     />
                 <% } else { %>
-                     <img  src="/images/cards/Deck.png"
-                           class="card card-2"
-                    />
+                     <img  src="/images/cards/Deck.png" class="card card-2"/>
                 <% } %>
-
             </div>
-
 
             <% if (positions.right) { %>
                 <div class="player player-right <%= currentPlayer && positions.right?.id === currentPlayer.id ? 'my-turn' : '' %>">
@@ -61,22 +54,21 @@
                 <img src="/images/cards/Deck.png" class="right-player-card">
                 <% } %>
                 </div>
-             <% } %>
+            <% } %>
 
-             <% const isMyTurn = currentPlayer && currentPlayer.id === me.id; %>
+            <% const isMyTurn = currentPlayer && currentPlayer.id === me.id; %>
             <div class="player player-bottom <%= isMyTurn ? 'my-turn' : '' %>">
-
-                      <h2 class = "player-name"> <%= me.username %></h2>
-                      <h4 class="card-count">Card Count: <%= myCards.length %></h4>
- 
-              
+                <h2 class = "player-name"> <%= me.username %></h2>
+                <h4 class="card-count">Card Count: <%= myCards.length %></h4>
                 <% myCards.forEach(card => { %>
-                    <img src="/images/cards/<%= card.color.charAt(0).toUpperCase() + card.color.slice(1) %>_<%= card.value %>.png"
-                         class="bottom-player-card"
-                         data-card-id = "<%= card.id %>"
+                    <img
+                        src="/images/cards/<%= card.color.charAt(0).toUpperCase() + card.color.slice(1) %>_<%= card.value %>.png"
+                        class="bottom-player-card"
+                        data-card-id="<%= card.id %>"
+                        data-color="<%= card.color %>"
+                        data-value="<%= card.value %>"
                     />
                 <% }) %>
-
             </div>
         </div>
 
@@ -85,53 +77,63 @@
             <img src="/images/assets/chat_image.png" class="chat-toggle">
         </button>
         <aside class="chat-section" data-room-type="game" data-game-room-id="<%= gameId %>">
-        <div class="chat-header">Game Chat</div>
+            <div class="chat-header">Game Chat</div>
 
-        <div class="chat-messages" id="chat-messages"></div>
+            <div class="chat-messages" id="chat-messages"></div>
 
-        <form class="chat-input" id="chat-form">
-          <input
-            type="text"
-            name="message"
-            id="chat-input-field"
-            placeholder="Type a message..."
-            autocomplete="off"
-          />
-          <button type="submit" class="-message">Send</button>
-        </form>
-      </aside>
+            <form class="chat-input" id="chat-form">
+            <input
+                type="text"
+                name="message"
+                id="chat-input-field"
+                placeholder="Type a message..."
+                autocomplete="off"
+            />
+            <button type="submit" class="-message">Send</button>
+            </form>
+        </aside>
 
-      <script>
-        // Chat UI toggle functionality
-        const chatButton = document.getElementById('chat-button');
-        const chatSection = document.querySelector('.chat-section');
+        <!-- COLOR PICK -->
+        <div class="color-modal" id="color-modal">
+            <div class="color-modal-backdrop"></div>
 
-        // Toggle chat on button click
-        chatButton.addEventListener('click', (e) => {
-            chatSection.classList.toggle('open');
-        });
+            <div class="color-picker">
+                <button class="color-slice red"    data-color="red"    type="button"></button>
+                <button class="color-slice green"  data-color="green"  type="button"></button>
+                <button class="color-slice yellow" data-color="yellow" type="button"></button>
+                <button class="color-slice blue"   data-color="blue"   type="button"></button>
+            </div>
+        </div>
 
-        // Close when clicking outside chat AND outside button
-        document.addEventListener('click', (e) => {
-            const clickedInsideChat = chatSection.contains(e.target);
-            const clickedChatButton = chatButton.contains(e.target);
+        <script>
+            // Chat UI toggle functionality
+            const chatButton = document.getElementById('chat-button');
+            const chatSection = document.querySelector('.chat-section');
 
-            if (!clickedInsideChat && !clickedChatButton) {
-                chatSection.classList.remove('open');
-            }
-        });
+            // Toggle chat on button click
+            chatButton.addEventListener('click', (e) => {
+                chatSection.classList.toggle('open');
+            });
 
-        // Close on Escape
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') {
-                chatSection.classList.remove('open');
-            }
-        });
-      </script>
+            // Close when clicking outside chat AND outside button
+            document.addEventListener('click', (e) => {
+                const clickedInsideChat = chatSection.contains(e.target);
+                const clickedChatButton = chatButton.contains(e.target);
 
+                if (!clickedInsideChat && !clickedChatButton) {
+                    chatSection.classList.remove('open');
+                }
+            });
 
+            // Close on Escape
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') {
+                    chatSection.classList.remove('open');
+                }
+            });
+        </script>
 
-      <script src="/js/bundle.js"></script>
+        <script src="/js/bundle.js"></script>
     
     </body>
 </html>
