@@ -714,6 +714,7 @@ export async function playCard(
   userId: number,
   deckCardId: number
 ) {
+  console.log("hello");
   const player = await findGameRoomPlayerByGameRoomAndUser(gameRoomId, userId);
   if (!player) {
     throw new Error("Player not found");
@@ -760,6 +761,13 @@ export async function playCard(
   await updateGameRoomPlayer(player.id, {
     cards_in_hand: player.cards_in_hand - 1
   });
+
+  const win = await checkWinCondition(gameRoomId,player.id);
+  if(win){
+    console.log("winner");
+    return win;
+  }
+
 
 
   const unoCard = await findUnoCardById(deckCard.card_id);
@@ -869,12 +877,15 @@ export async function playCard(
     return;
   }
 
+
   await createGameTurn({
     game_room_id: gameRoomId,
     player_id: player.id,
     card_played_id: deckCard.card_id,
     action_type: "play",
   });
+
+
 }
 
 /**
@@ -1006,3 +1017,46 @@ async function applyDrawFour(gameRoomId: number, targetPlayerId: number){
     }
 }
 
+async function checkWinCondition(gameRoomId: number, playerId: number){
+  
+  const player = await findGameRoomPlayerById(playerId);
+
+  if (!player){
+    return null;
+  }
+
+  if (player.cards_in_hand === 0) {
+    const result = await createGameResult({
+      game_room_id: gameRoomId,
+      winner_id: player.user_id,
+    });
+
+    const players = await findGameRoomPlayersByGameRoom(gameRoomId);
+
+    const sorted = [...players].sort(
+      (a, b) => a.cards_in_hand - b.cards_in_hand
+    );
+
+    for (let i = 0; i < sorted.length; i++){
+      await createGameResultPlayer({
+        game_result_id: result.id,
+        user_id: sorted[i].user_id,
+        rank: i + 1,
+        cards_left: sorted[i].cards_in_hand,
+      })
+    }
+
+    await updateGameRoom(gameRoomId, {
+      status: "finished",
+      ended_at: new Date(),
+    });
+
+    return {
+      winnerId: player.user_id,
+    
+    }
+
+  }
+  return null;
+
+}

@@ -4,7 +4,8 @@ import {
   GAME_DRAW,
   GAME_PLAY,
   GAME_STATE,
-  GAME_ERROR
+  GAME_ERROR,
+  GAME_OVER,
 } from "@shared/keys";
 
 
@@ -12,6 +13,9 @@ import {
     findGameRoomPlayersByGameRoom,
     drawCardForPlayer,
     playCard,
+    deleteGameRoom,
+    findGameResultByGameRoom,
+    findGameResultPlayersByGameResult,
 } from "@backend/db/game"
 
 export interface GameSocket extends Socket {
@@ -72,7 +76,21 @@ export function initializeGameHandlers(socket: GameSocket, io: Server): void {
         try {
             console.log(`[game] Player ${socket.username} attempting to play card ${deckCardId} in game ${gameId}`);
 
-            await playCard(gameId,socket.userId,deckCardId);
+            const result = await playCard(gameId,socket.userId,deckCardId);
+
+            if (result?.winnerId){
+
+                const gameResult = await findGameResultByGameRoom(gameId);
+                if (gameResult){
+                    const rankings = await findGameResultPlayersByGameResult(gameResult.id);
+                    io.to(`game:${gameId}`).emit(GAME_OVER, {
+                        winnerId: result.winnerId,
+                        rankings: rankings,
+                    });
+                }
+
+                return;
+            }
 
             io.to(`game:${gameId}`).emit(GAME_STATE, {gameId});
 
@@ -80,6 +98,12 @@ export function initializeGameHandlers(socket: GameSocket, io: Server): void {
             console.error("[game] Error playing card:", err);
             socket.emit(GAME_ERROR, { message: "Invalid card play"});
         }
+    });
+
+
+    socket.on("game:close", async ({ gameId }) => {
+        await deleteGameRoom(gameId);
+        io.to(`game:${gameId}`).emit("game:closed");
     });
 
 
