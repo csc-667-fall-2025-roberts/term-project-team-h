@@ -14,7 +14,8 @@ export const GAME_DRAW = "game:draw";
 export const GAME_PLAY = "game:play";
 export const GAME_ERROR = "game:error";
 export const GAME_STATE = "game:state";
-export const GAME_JOINED = "game:joined"
+export const GAME_JOINED = "game:joined";
+export const GAME_OVER = "game:over";
 
 // Wait Room Events
 export const WAITING_ROOM_JOINED = "waitingRoom:joined";

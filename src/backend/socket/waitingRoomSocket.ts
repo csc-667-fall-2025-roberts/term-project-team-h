@@ -142,7 +142,7 @@ export function initializeWaitRoomHandlers(socket: WaitRoomSocket, io: Server): 
       (p) => Number(p.userId) === Number(socket.userId)
     );
 
-    if (!me || !me.isGameMaster) {
+    if (!me || !me.isHost) {
       socket.emit("waitingRoom:error", {
         message: "Only the host can delete this room",
       });

@@ -32,7 +32,7 @@ export const waitingRoomQueries = {
       p.id,
       p.user_id AS "userId",
       p.game_room_id AS "gameRoomId",
-      p.is_game_master AS "isGameMaster",
+      p.is_host AS "isHost",
       p.player_order AS "playerOrder",
       p.cards_in_hand AS "cardsInHand",
       p.joined_at AS "joinedAt",
@@ -54,7 +54,7 @@ export const waitingRoomQueries = {
       id,
       user_id AS "userId",
       game_room_id AS "gameRoomId",
-      is_game_master AS "isGameMaster",
+      is_host AS "isHost",
       player_order AS "playerOrder",
       cards_in_hand AS "cardsInHand",
       joined_at AS "joinedAt"
@@ -80,7 +80,7 @@ export const waitingRoomQueries = {
     INSERT INTO game_room_players (
       user_id,
       game_room_id,
-      is_game_master,
+      is_host,
       player_order,
       cards_in_hand,
       joined_at
@@ -90,7 +90,7 @@ export const waitingRoomQueries = {
       id,
       user_id AS "userId",
       game_room_id AS "gameRoomId",
-      is_game_master AS "isGameMaster",
+      is_host AS "isHost",
       player_order AS "playerOrder",
       cards_in_hand AS "cardsInHand",
       joined_at AS "joinedAt"

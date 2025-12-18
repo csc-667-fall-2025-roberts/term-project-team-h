@@ -11,7 +11,7 @@ import {
 interface WaitingRoomPlayer {
     userId: number;
     username: string;
-    isGameMaster: boolean;
+    isHost: boolean;
 }
 
 interface WaitingRoomPlayersPayload {
@@ -29,7 +29,7 @@ export function initializeWaitingRoom(): void {
     if (!root || !root.dataset.roomId) return; // not a waiting-room page
 
     const roomIdAttr = root.dataset.roomId;
-    const isGameMasterAttr = root.dataset.isGamemaster;
+    const isHostAttr = root.dataset.isHost;
 
     const roomId = Number(roomIdAttr);
     if (!Number.isFinite(roomId)) {
@@ -37,7 +37,7 @@ export function initializeWaitingRoom(): void {
         return;
     }
 
-    const isGameMaster = isGameMasterAttr === "true";
+    const isHost = isHostAttr === "true";
 
     const playersList =
         document.querySelector<HTMLUListElement>(".player-list");
@@ -67,7 +67,7 @@ export function initializeWaitingRoom(): void {
         payload.players.forEach((player) => {
             const li = document.createElement("li");
             li.textContent =
-                player.username + (player.isGameMaster ? " (Host)" : "");
+                player.username + (player.isHost ? " (Host)" : "");
             playersList.appendChild(li);
         });
     });
@@ -92,7 +92,7 @@ export function initializeWaitingRoom(): void {
         if (startButton) startButton.disabled = false;
     });
 
-    if (startButton && isGameMaster) {
+    if (startButton && isHost) {
         startButton.addEventListener("click", () => {
             startButton.disabled = true;
             socket.emit(WAITING_ROOM_START, { roomId });
@@ -108,7 +108,7 @@ export function initializeWaitingRoom(): void {
         });
     }
 
-    if (deleteButton && isGameMaster) {
+    if (deleteButton && isHost) {
         deleteButton.addEventListener("click", () => {
             const confirmed = window.confirm(
                 "Are you sure you want to delete this room for everyone?"

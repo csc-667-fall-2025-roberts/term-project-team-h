@@ -12,7 +12,7 @@
     - Signed-Out Landing Page
     - Sign-Up Page
     - Game Results (Player POV)
-    - Game Results (Game Master POV)
+    - Game Results (Host POV)
 ---
 ## Ajmal
 - Wireframes
