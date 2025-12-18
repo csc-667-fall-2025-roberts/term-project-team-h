@@ -288,3 +288,37 @@ body {
     3px 4px 0 black;
 }
 
+
+#game-over-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.85);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 999;
+}
+
+#game-over-overlay.hidden {
+  display: none;
+}
+
+.game-over-box {
+  background: black;
+  padding: 40px;
+  border-radius: 10px;
+  text-align: center;
+}
+
+.game-over-box h1 {
+  font-family: BarberShop;
+  color: white;
+  margin-bottom: 20px;
+}
+
+#close-game-btn {
+  font-family: BarberShop;
+  padding: 10px 20px;
+  cursor: pointer;
+}
+
