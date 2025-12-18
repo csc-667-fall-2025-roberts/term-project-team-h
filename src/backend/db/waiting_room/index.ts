@@ -21,7 +21,7 @@ export interface WaitingRoomPlayer {
   userId: number;
   gameRoomId: number;
   username: string;
-  isGameMaster: boolean;
+  isHost: boolean;
   playerOrder: number | null;
   cardsInHand: number;
   joinedAt: Date;
@@ -91,9 +91,9 @@ export async function countWaitingRoomPlayers(
 export async function addPlayerToWaitingRoom(options: {
   roomId: number;
   userId: number;
-  isGameMaster?: boolean;
+  isHost?: boolean;
 }): Promise<WaitingRoomPlayer> {
-  const { roomId, userId, isGameMaster = false } = options;
+  const { roomId, userId, isHost = false } = options;
 
   // decide the player_order: append at the end
   const currentCount = await countWaitingRoomPlayers(roomId);
@@ -101,7 +101,7 @@ export async function addPlayerToWaitingRoom(options: {
 
   const player = await db.one<WaitingRoomPlayer>(
     waitingRoomQueries.addPlayerToRoom,
-    [userId, roomId, isGameMaster, playerOrder, 0]
+    [userId, roomId, isHost, playerOrder, 0]
   );
 
   return player;

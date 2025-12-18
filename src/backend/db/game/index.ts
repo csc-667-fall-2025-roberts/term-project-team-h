@@ -40,7 +40,7 @@ export interface GameRoomPlayer {
   id: number;
   user_id: number;
   game_room_id: number;
-  is_game_master: boolean;
+  is_host: boolean;
   player_order: number | null;
   cards_in_hand: number;
   joined_at: Date;
@@ -53,7 +53,7 @@ export interface GameRoomPlayerWithUsername extends GameRoomPlayer {
 export interface CreateGameRoomPlayerData {
   user_id: number;
   game_room_id: number;
-  is_game_master?: boolean;
+  is_host?: boolean;
   player_order?: number;
 }
 
@@ -244,18 +244,18 @@ export async function createGameRoomPlayer(
 ): Promise<GameRoomPlayer> {
   const player = await db.one<GameRoomPlayer>(
     gameRoomPlayerQueries.create,
-    [data.user_id, data.game_room_id, data.is_game_master || false, data.player_order || null]
+    [data.user_id, data.game_room_id, data.is_host || false, data.player_order || null]
   );
   return player;
 }
 
 export async function updateGameRoomPlayer(
   id: number,
-  data: Partial<Pick<GameRoomPlayer, "is_game_master" | "player_order" | "cards_in_hand">>
+  data: Partial<Pick<GameRoomPlayer, "is_host" | "player_order" | "cards_in_hand">>
 ): Promise<GameRoomPlayer | null> {
   const player = await db.oneOrNone<GameRoomPlayer>(
     gameRoomPlayerQueries.update,
-    [data.is_game_master, data.player_order, data.cards_in_hand, id]
+    [data.is_host, data.player_order, data.cards_in_hand, id]
   );
   return player;
 }

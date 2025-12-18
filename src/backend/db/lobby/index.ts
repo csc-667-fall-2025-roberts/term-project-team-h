@@ -70,11 +70,11 @@ export async function createGameRoom(
       createdAt: Date;
     }>(gameRoomQueries.createRoom, [title, maxPlayers, password, createdBy]);
 
-    // Host joins as game master
+    // Host joins as room host
     await t.one(gameRoomQueries.addPlayerToRoom, [
       createdBy, // user_id
       room.id, // game_room_id
-      true, // is_game_master
+      true, // is_host
       0, // player_order
       0, // cards_in_hand
     ]);

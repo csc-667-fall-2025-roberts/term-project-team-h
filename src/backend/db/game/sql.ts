@@ -42,13 +42,13 @@ export const gameRoomPlayerQueries = {
     WHERE game_room_id = $1 AND user_id = $2
   `,
   create: `
-    INSERT INTO game_room_players (user_id, game_room_id, is_game_master, player_order)
+    INSERT INTO game_room_players (user_id, game_room_id, is_host, player_order)
     VALUES ($1, $2, $3, $4)
     RETURNING *
   `,
   update: `
     UPDATE game_room_players
-    SET is_game_master = COALESCE($1, is_game_master),
+    SET is_host = COALESCE($1, is_host),
         player_order = COALESCE($2, player_order),
         cards_in_hand = COALESCE($3, cards_in_hand)
     WHERE id = $4

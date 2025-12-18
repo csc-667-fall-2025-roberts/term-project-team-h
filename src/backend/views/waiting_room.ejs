@@ -10,7 +10,7 @@
     <div
       class="page"
       data-room-id="<%= room.id %>"
-      data-is-gamemaster="<%= isGameMaster %>"
+      data-is-host="<%= isHost %>"
     >
       <header class="page-header">
         <h1><%= room.hostUsername %>'s Game Lobby</h1>
@@ -24,7 +24,7 @@
               <% players.forEach(function (player) { %>
                 <li>
                   <%= player.username %>
-                  <% if (player.isGameMaster) { %>
+                  <% if (player.isHost) { %>
                     (Host)
                   <% } %>
                 </li>
@@ -33,7 +33,7 @@
           </div>
 
           <div style="margin-top: 24px;">
-            <% if (isGameMaster) { %>
+            <% if (isHost) { %>
             <button
               class="primary-button wide-button"
               type="button"
@@ -49,7 +49,7 @@
               Delete Room
             </button>
             <%}%>
-            <% if (!isGameMaster) { %>
+            <% if (!isHost) { %>
               <button
                 class="primary-button wide-button"
                 type="button"
@@ -82,7 +82,7 @@
 
       <footer class="page-footer">
         <div class="start-wrapper">
-          <% if (isGameMaster) { %>
+          <% if (isHost) { %>
             <button
               type="button"
               class="primary-button start-button"

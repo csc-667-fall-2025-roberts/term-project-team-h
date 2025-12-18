@@ -63,7 +63,7 @@ export const gameRoomQueries = {
     INSERT INTO game_room_players (
       user_id,
       game_room_id,
-      is_game_master,
+      is_host,
       player_order,
       cards_in_hand,
       joined_at
