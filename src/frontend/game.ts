@@ -66,7 +66,6 @@ export function initializeGame(): void {
 
     socket.on(GAME_OVER, ({ winnerId, rankings }) => {
         const overlay = document.getElementById("game-over-overlay")!;
-        const title = document.getElementById("game-over-title")!;
         const contentDiv = document.getElementById("game-over-content")!;
 
         const myUserId = Number(
@@ -76,6 +75,7 @@ export function initializeGame(): void {
 
         console.log("Game Over - Winner ID:", winnerIdNum, "My User ID:", myUserId);
         console.log("Rankings:", rankings);
+
 
         contentDiv.innerHTML = '';
 
@@ -87,19 +87,53 @@ export function initializeGame(): void {
             winnerMessage.textContent = 'You are the Winner!';
             contentDiv.appendChild(winnerMessage);
         }else {
-            const winner = rankings.find((r: any) => r.user_id === winnerIdNum);
+            const winner = rankings?.find((r: any) => Number(r.user_id) === winnerIdNum);
+            console.log("Found winner:", winner);
             const winnerMessage = document.createElement('h2');
             winnerMessage.className = 'winner-announcement';
             winnerMessage.textContent = `Winner: ${winner?.username || 'Unknown'}`;
             contentDiv.appendChild(winnerMessage);
         }
-         
 
-        if (winnerIdNum === myUserId) {
-            title.textContent = "Winner";
-        } else {
-            title.textContent = "Game Over";
-        }
+        const rankingsTitle = document.createElement('h3');
+        rankingsTitle.className = 'rankings-title';
+        rankingsTitle.textContent = 'Final Rankings';
+        contentDiv.appendChild(rankingsTitle);
+
+        const rankingsList = document.createElement('div');
+        rankingsList.className = 'rankings-list';
+
+        const rankLabels = ['1st Place', '2nd Place',  '3rd Place', '4th Place'];
+
+        rankings.forEach((player: any, index: number) => {
+            const rankItem = document.createElement('div');
+            rankItem.className = 'rank-item';
+        
+            if (Number(player.user_id) === myUserId) {
+                rankItem.classList.add('current-user');
+            }
+        
+            const rankLabel = document.createElement('span');
+            rankLabel.className = 'rank-label';
+            rankLabel.textContent = rankLabels[index] || `${index + 1}th Place`;
+        
+            const playerName = document.createElement('span');
+            playerName.className = 'player-name';
+            playerName.textContent = player.username;
+        
+            const cardsLeft = document.createElement('span');
+            cardsLeft.className = 'cards-left';
+            cardsLeft.textContent = `${player.cards_left} cards left`;
+        
+            rankItem.appendChild(rankLabel);
+            rankItem.appendChild(playerName);
+            rankItem.appendChild(cardsLeft);
+        
+            rankingsList.appendChild(rankItem);
+        });
+
+         
+        contentDiv.appendChild(rankingsList);
 
         overlay.classList.remove("hidden");
     });
@@ -107,12 +141,12 @@ export function initializeGame(): void {
     const closeButton = document.getElementById("close-game-btn");
     if (closeButton) {
         closeButton.addEventListener("click", () => {
-            console.log("[game] Close button clicked"); // Add logging
+            console.log("[game] Close button clicked"); 
             socket.emit("game:close", { gameId });
         });
     }
     socket.on("game:closed", () => {
-        console.log("[game] Game closed, redirecting to lobby"); // Add logging
+        console.log("[game] Game closed, redirecting to lobby");
         window.location.href = "/lobby";
     });
 

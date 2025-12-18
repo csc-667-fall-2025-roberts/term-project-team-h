@@ -4,6 +4,11 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>UNO Lobby</title>  
         <link rel="stylesheet" href="/stylesheets/game.css">
+
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Science+Gothic:wght@100..900&display=swap" rel="stylesheets">
+
     </head>
     <body data-game-id="<%= gameId %>"  data-user-id="<%= me.user_id %>">
 
@@ -80,9 +85,10 @@
             </div>
         </div>
 
+        <!-- Game over screen -->
         <div id="game-over-overlay" class="hidden">
             <div class="game-over-box">
-                <h1 id="game-over-main-title">Game Over</h1>
+                <h1 id="game-over-main-title">GAME OVER</h1>
                 <div id="game-over-content">    
                     
                 </div>
