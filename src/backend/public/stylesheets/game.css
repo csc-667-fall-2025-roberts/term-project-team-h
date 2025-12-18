@@ -307,8 +307,7 @@ body {
 }
 
 .game-over-box {
-    background: #291919;
-    background: linear-gradient(134deg,rgba(41, 25, 25, 1) 0%, rgba(156, 84, 84, 1) 100%);
+    background: linear-gradient(to bottom, #D12D36 0%, #8A181D 100%);
     padding: 40px;
     border-radius: 20px;
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
