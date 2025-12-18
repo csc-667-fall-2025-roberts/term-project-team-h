@@ -81,19 +81,19 @@ export const gameRoomDeckQueries = {
     FROM game_room_decks grd
     JOIN uno_cards uc ON grd.card_id = uc.id
     WHERE grd.game_room_id = $1
-      AND grd.owner_player_id = $2
+      AND grd.held_by_player_id = $2
       AND grd.location = 'player_hand'
     ORDER BY grd.position_index ASC
   `,
   create: `
-    INSERT INTO game_room_decks (game_room_id, card_id, location, owner_player_id, position_index)
+    INSERT INTO game_room_decks (game_room_id, card_id, location, held_by_player_id, position_index)
     VALUES ($1, $2, $3, $4, $5)
     RETURNING *
   `,
   update: `
     UPDATE game_room_decks
     SET location = COALESCE($1, location),
-        owner_player_id = COALESCE($2, owner_player_id),
+        held_by_player_id = COALESCE($2, held_by_player_id),
         position_index = COALESCE($3, position_index)
     WHERE id = $4
     RETURNING *
@@ -102,14 +102,14 @@ export const gameRoomDeckQueries = {
   deleteByGameRoom: "DELETE FROM game_room_decks WHERE game_room_id = $1",
   
   /**
-   *  Validates card ownership
+   *  Validates card is held by player
    */
   canPlayCard:`
     SELECT grd.*
     FROM game_room_decks grd
     WHERE grd.id = $1
       AND grd.game_room_id = $2
-      AND grd.owner_player_id = $3
+      AND grd.held_by_player_id = $3
       AND grd.location = 'player_hand'
   `,
   /**
@@ -119,7 +119,7 @@ export const gameRoomDeckQueries = {
   moveCardToDiscard:`
     UPDATE game_room_decks
     SET location = 'discard',
-      owner_player_id = NULL,
+      held_by_player_id = NULL,
       position_index = $2
     WHERE id = $1
     RETURNING *
@@ -156,7 +156,7 @@ export const gameRoomDeckQueries = {
   moveCardToPlayerHand:`
     UPDATE game_room_decks
     SET location = 'player_hand',
-      owner_player_id = $2,
+      held_by_player_id = $2,
       position_index = $3
     WHERE id = $1
     RETURNING *

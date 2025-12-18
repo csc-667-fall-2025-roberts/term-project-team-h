@@ -70,7 +70,7 @@ export interface GameRoomDeck {
   game_room_id: number;
   card_id: number;
   location: "deck" | "discard" | "player_hand";
-  owner_player_id: number | null;
+  held_by_player_id: number | null;
   position_index: number | null;
 }
 
@@ -78,7 +78,7 @@ export interface CreateGameRoomDeckData {
   game_room_id: number;
   card_id: number;
   location: "deck" | "discard" | "player_hand";
-  owner_player_id?: number;
+  held_by_player_id?: number;
   position_index?: number;
 }
 
@@ -338,7 +338,7 @@ export async function createGameRoomDeck(data: CreateGameRoomDeckData): Promise<
       data.game_room_id,
       data.card_id,
       data.location,
-      data.owner_player_id || null,
+      data.held_by_player_id || null,
       data.position_index ?? null,
     ]
   );
@@ -347,11 +347,11 @@ export async function createGameRoomDeck(data: CreateGameRoomDeckData): Promise<
 
 export async function updateGameRoomDeck(
   id: number,
-  data: Partial<Pick<GameRoomDeck, "location" | "owner_player_id" | "position_index">>
+  data: Partial<Pick<GameRoomDeck, "location" | "held_by_player_id" | "position_index">>
 ): Promise<GameRoomDeck | null> {
   const deck = await db.oneOrNone<GameRoomDeck>(
     gameRoomDeckQueries.update,
-    [data.location, data.owner_player_id, data.position_index, id]
+    [data.location, data.held_by_player_id, data.position_index, id]
   );
   return deck;
 }
@@ -510,7 +510,7 @@ export async function startGame(gameRoomId: number){
         game_room_id: gameRoomId,
         card_id: shuffled[deckIndex].id,
         location: "player_hand",
-        owner_player_id: player.id,
+        held_by_player_id: player.id,
         position_index: i,
       });
       deckIndex++
@@ -619,7 +619,7 @@ export async function giveCardToPlayer(
 ): Promise<GameRoomDeck | null> {
   const updated = await updateGameRoomDeck(deckCardId, {
     location: "player_hand",
-    owner_player_id: playerId,
+    held_by_player_id: playerId,
     position_index: null,
   });
   return updated;
@@ -661,7 +661,7 @@ export async function drawCardForPlayer(
 
   await updateGameRoomDeck(topCard.id, {
     location: "player_hand",
-    owner_player_id: player.id,
+    held_by_player_id: player.id,
     position_index: nextHandPosition,
   });
 
@@ -677,7 +677,7 @@ export async function drawCardForPlayer(
 
     await updateGameRoomDeck(topCard.id, {
       location: "discard",
-      owner_player_id: null,
+      held_by_player_id: null,
       position_index: nextPosition,
     });
 
@@ -735,9 +735,9 @@ export async function playCard(
 
   console.log("[playCard] Deck Card:", deckCard);
 
-  if (Number(deckCard.owner_player_id) !== player.id) {
+  if (Number(deckCard.held_by_player_id) !== player.id) {
     throw new Error(
-      `You do not own this card. Card owner: ${deckCard.owner_player_id}, You are: ${player.id}`
+      `You do not have this card. Card held by: ${deckCard.held_by_player_id}, You are: ${player.id}`
     );
   }
 
@@ -753,7 +753,7 @@ export async function playCard(
 
   await updateGameRoomDeck(deckCardId, {
     location: "discard",
-    owner_player_id: null,
+    held_by_player_id: null,
     position_index: nextPosition,
   });
 
@@ -972,7 +972,7 @@ async function applyDrawTwo(gameRoomId: number, targetPlayerId: number) {
 
     await updateGameRoomDeck(card.id, {
       location: "player_hand",
-      owner_player_id: targetPlayerId,
+      held_by_player_id: targetPlayerId,
       position_index: null,
     });
   }
@@ -992,7 +992,7 @@ async function applyDrawFour(gameRoomId: number, targetPlayerId: number){
 
       await updateGameRoomDeck(card.id, {
         location: "player_hand",
-        owner_player_id: targetPlayerId,
+        held_by_player_id: targetPlayerId,
         position_index: null,
       });
 
