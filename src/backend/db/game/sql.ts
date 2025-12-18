@@ -18,8 +18,9 @@ export const gameRoomQueries = {
         password = COALESCE($3, password),
         status = COALESCE($4, status),
         started_at = COALESCE($5, started_at),
-        ended_at = COALESCE($6, ended_at)
-    WHERE id = $7
+        ended_at = COALESCE($6, ended_at),
+        turn_direction = COALESCE($7, turn_direction)
+    WHERE id = $8
     RETURNING *
   `,
   delete: "DELETE FROM game_rooms WHERE id = $1",
