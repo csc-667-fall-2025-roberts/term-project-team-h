@@ -2,6 +2,14 @@ import { io, Socket } from "socket.io-client";
 import type { ChatMessageWithUsername } from "@shared/types";
 import { CHAT_LISTING, CHAT_MESSAGE, GLOBAL_ROOM } from "@shared/keys";
 
+declare global {
+  interface Window {
+    ChatManager: typeof ChatManager;
+    GLOBAL_ROOM: string;
+    __chatInitialized?: boolean;
+  }
+}
+
 export class ChatManager {
   private socket: Socket | null = null;
   private roomId: number | string | null = null;
@@ -195,5 +203,69 @@ export class ChatManager {
 
     this.messageContainer.scrollTop = this.messageContainer.scrollHeight;
   }
+}
+
+export function initializeChat(): void {
+  // Use window property to persist across multiple script loads
+  if (window.__chatInitialized) {
+    console.log("Chat already initialized, skipping...");
+    return;
+  }
+
+  const chatSection = document.querySelector(".chat-section");
+  if (!chatSection) return;
+
+  const roomType = chatSection.getAttribute("data-room-type");
+  if (!roomType) return;
+
+  const messageContainer = chatSection.querySelector(
+    "#chat-messages"
+  ) as HTMLElement | null;
+  const messageInput = chatSection.querySelector(
+    "#chat-input-field"
+  ) as HTMLInputElement | null;
+  const sendButton = chatSection.querySelector(
+    "#chat-form button[type='submit']"
+  ) as HTMLButtonElement | null;
+
+  if (!messageContainer || !messageInput || !sendButton) {
+    console.error("Chat: Required elements not found");
+    return;
+  }
+
+  let roomId: number | string;
+
+  if (roomType === "lobby") {
+    roomId = GLOBAL_ROOM;
+  } else if (roomType === "game") {
+    const roomIdAttr = chatSection.getAttribute("data-game-room-id");
+    if (!roomIdAttr) {
+      console.error("Chat: data-game-room-id not found");
+      return;
+    }
+    roomId = Number(roomIdAttr);
+    if (!Number.isFinite(roomId)) {
+      console.error("Chat: Invalid room ID");
+      return;
+    }
+  } else {
+    console.error("Chat: Unknown room type");
+    return;
+  }
+
+  const chatManager = new ChatManager();
+  chatManager.initialize(roomId, {
+    messageContainer,
+    messageInput,
+    sendButton,
+  });
+
+  window.__chatInitialized = true;
+}
+
+// Set up window globals for backward compatibility if needed
+if (typeof window !== "undefined") {
+  window.ChatManager = ChatManager;
+  window.GLOBAL_ROOM = GLOBAL_ROOM;
 }
 
