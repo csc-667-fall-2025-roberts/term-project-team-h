@@ -810,11 +810,11 @@ export async function playCard(
     });
 
     if (players.length === 2) {
-      const otherPlayer = players.find(p => p.id !== player.id);
-      if (otherPlayer) {
+      const opponent = players.find(candidate => candidate.id !== player.id);
+      if (opponent) {
         await createGameTurn({
           game_room_id: gameRoomId,
-          player_id: otherPlayer.id,
+          player_id: opponent.id,
           action_type: "skip",
         });
       }
