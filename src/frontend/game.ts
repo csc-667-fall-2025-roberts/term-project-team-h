@@ -211,6 +211,45 @@ export function initializeGame(): void {
             } else {
                 playerDiv.classList.remove("my-turn");
             }
+
+            let cardClass = '';
+            if (playerDiv.classList.contains('player-top')) {
+                cardClass = 'top-player-card';
+            } else if (playerDiv.classList.contains('player-left')) {
+                cardClass = 'left-player-card';
+            } else if (playerDiv.classList.contains('player-right')) {
+                cardClass = 'right-player-card';
+            } else {
+                return;
+            }
+
+
+            const existingCards = playerDiv.querySelectorAll(`.${cardClass}`);
+            existingCards.forEach(card => card.remove());
+
+            const cardsInHand = p.cards_in_hand;
+
+            if (cardClass === 'top-player-card') {
+                const nameElement = playerDiv.querySelector('.player-name');
+                for (let i = 0; i < cardsInHand; i++) {
+                    const img = document.createElement('img');
+                    img.src = '/images/cards/Deck.png';
+                    img.className = cardClass;
+                    if (nameElement) {
+                        playerDiv.insertBefore(img, nameElement);
+                    } else {
+                        playerDiv.appendChild(img);
+                    }
+                }
+            } else {
+                for (let i = 0; i < cardsInHand; i++) {
+                    const img = document.createElement('img');
+                    img.src = '/images/cards/Deck.png';
+                    img.className = cardClass;
+                    playerDiv.appendChild(img);
+                }
+            }
+
         });
     }
 
