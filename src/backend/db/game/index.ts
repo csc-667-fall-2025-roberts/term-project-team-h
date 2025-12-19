@@ -498,56 +498,94 @@ export async function startGame(gameRoomId: number) {
   const allCards = await listUnoCards();
   const shuffled = allCards.sort(() => Math.random() - 0.5);
 
-  const cardsPerPlayer = 7;
-  let deckIndex = 0;
+  // choose first discard by rotating specials to the back
+  function isNumberCard(card: { value: string }) {
+    return /^[0-9]+$/.test(card.value);
+  }
 
-  // deal cards
+  const deckQueue = [...shuffled]; // rotating specials
+  let firstDiscardCard = null as (typeof shuffled[0]) | null;
+  const SAFETY_LIMIT = deckQueue.length + 5;
+  let cycles = 0;
+
+  while (deckQueue.length > 0 && cycles < SAFETY_LIMIT) {
+    const candidate = deckQueue.shift()!;
+    if (isNumberCard(candidate)) {
+      firstDiscardCard = candidate;
+      break;
+    } else {
+      // rotate special to bottom
+      deckQueue.push(candidate);
+    }
+    cycles++;
+  }
+
+  // fallback if no numeric card found
+  if (!firstDiscardCard) {
+    firstDiscardCard = deckQueue.shift() || shuffled[0];
+  }
+
+  // deal cards to players from the front of deckQueue
+  const CARDS_PER_PLAYER = 7;
+
   for (const player of shuffledPlayers) {
-    for (let i = 0; i < cardsPerPlayer; i++) {
+    for (let i = 0; i < CARDS_PER_PLAYER; i++) {
+      const cardToDeal = deckQueue.shift();
+      if (!cardToDeal) throw new Error("Ran out of cards while dealing");
       await createGameRoomDeck({
         game_room_id: gameRoomId,
-        card_id: shuffled[deckIndex].id,
+        card_id: cardToDeal.id,
         location: "player_hand",
         held_by_player_id: player.id,
         position_index: i,
       });
-      deckIndex++;
     }
     await updateGameRoomPlayer(player.id, {
-      cards_in_hand: cardsPerPlayer,
+      cards_in_hand: CARDS_PER_PLAYER,
     });
   }
 
-  // remaining cards into deck
-  for (let i = deckIndex + 1; i < shuffled.length; i++) {
+  // remaining queue becomes the draw deck
+  for (let i = 0; i < deckQueue.length; i++) {
     await createGameRoomDeck({
       game_room_id: gameRoomId,
-      card_id: shuffled[i].id,
+      card_id: deckQueue[i].id,
       location: "deck",
-      position_index: i - deckIndex,
+      position_index: i,
     });
   }
 
-  // first discard
+  // put the chosen numeric first discard on top of discard pile
   await createGameRoomDeck({
     game_room_id: gameRoomId,
-    card_id: shuffled[deckIndex].id,
+    card_id: firstDiscardCard.id,
     location: "discard",
     position_index: 0,
   });
 
-  // update game room status
+  // determine effective color for the initial discard:
+  let effectiveColor: "red" | "green" | "yellow" | "blue" = "red";
+  if (firstDiscardCard.color && firstDiscardCard.color !== "wild") {
+    effectiveColor = firstDiscardCard.color as typeof effectiveColor;
+  } 
+  else {
+    const fallback = deckQueue.find((c) => c.color !== "wild" && isNumberCard(c));
+    if (fallback && fallback.color) effectiveColor = fallback.color as typeof effectiveColor;
+  }
+
+  // update game room status and set current_color so canPlayCard works correctly
   await updateGameRoom(gameRoomId, {
     status: "in_progress",
     started_at: new Date(),
     turn_direction: 1,
-    current_color: null, // will be set on first play
+    current_color: effectiveColor,
   });
 
   console.log("[startGame] Game initialized for room", gameRoomId);
 
   return { message: "Game started successfully" };
 }
+
 
 /**
  *  Function to get the top card in the discard pile
@@ -891,6 +929,7 @@ export async function getCurrentPlayer(
 }
 
 /**
+ * Function to get next player in turn order
  */
 
 export async function getNextPlayer(

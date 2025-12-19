@@ -42,13 +42,16 @@
                     </a>
                 </div>
 
-                <% if (topDiscard) { %>
+                <div class="discard-pile">
+                    <div id="active-color-indicator" class="active-color hidden"></div>
+                    <% if (topDiscard) { %>
                     <img src="/images/cards/<%= topDiscard.color.charAt(0).toUpperCase() + topDiscard.color.slice(1) %>_<%= topDiscard.value %>.png" 
                          class="card card-2"
-                    />
-                <% } else { %>
-                     <img  src="/images/cards/Deck.png" class="card card-2"/>
-                <% } %>
+                        />
+                    <% } else { %>
+                        <img  src="/images/cards/Deck.png" class="card card-2"/>
+                    <% } %>
+                </div>
             </div>
 
             <% if (positions.right) { %>
