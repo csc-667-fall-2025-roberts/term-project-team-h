@@ -146,20 +146,17 @@ export class ChatManager {
   }
 
   private async loadMessageHistory(): Promise<void> {
-    if (this.roomId === GLOBAL_ROOM) {
-      fetch("/chat", {
-        method: "GET",
-        credentials: "include",
-      }).catch((error) => {
-        console.error("Error loading messages:", error);
-      });
-      return;
-    }
-
     try {
-      const response = await fetch(`/chat/${this.roomId}`, {
+      const url = this.roomId === GLOBAL_ROOM 
+        ? "/chat?limit=100" 
+        : `/chat/${this.roomId}?limit=100`;
+      
+      const response = await fetch(url, {
         method: "GET",
         credentials: "include",
+        headers: {
+          "Accept": "application/json",
+        },
       });
 
       if (!response.ok) {

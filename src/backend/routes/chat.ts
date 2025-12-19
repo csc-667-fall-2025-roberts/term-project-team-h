@@ -9,13 +9,17 @@ const router = express.Router();
 
 // Global lobby chat
 router.get("/", requireUser, async (request, response) => {
-  response.status(202).send();
-
   if (!request.session?.user) {
-    return;
+    return response.status(401).json({ error: "Unauthorized" });
   }
 
-  const messages = await Chat.list();
+  const limit = request.query.limit 
+    ? parseInt(request.query.limit as string, 10) 
+    : 100;
+
+  const messages = await Chat.list(limit);
+
+  response.json({ messages });
 
   const io = request.app.get("io") as SocketIOServer;
   const sessionId = request.session.id;
@@ -48,24 +52,28 @@ router.post("/", requireUser, async (request, response) => {
 
 // Room-specific chat
 router.get("/:roomId", requireUser, async (request, response) => {
-  response.status(202).send();
-
   if (!request.session?.user) {
-    return;
+    return response.status(401).json({ error: "Unauthorized" });
   }
 
   const roomId = Number(request.params.roomId);
   if (!Number.isFinite(roomId)) {
-    return;
+    return response.status(400).json({ error: "Invalid room ID" });
   }
 
   const userId = request.session.user.id;
   const userInRoom = await isUserInRoom(roomId, userId);
   if (!userInRoom) {
-    return;
+    return response.status(403).json({ error: "Not in room" });
   }
 
-  const messages = await Chat.findChatMessagesByGameRoom(roomId);
+  const limit = request.query.limit 
+    ? parseInt(request.query.limit as string, 10) 
+    : 100;
+
+  const messages = await Chat.findChatMessagesByGameRoom(roomId, limit);
+
+  response.json({ messages });
 
   const io = request.app.get("io") as SocketIOServer;
   const sessionId = request.session.id;

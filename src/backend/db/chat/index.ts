@@ -25,12 +25,22 @@ export interface CreateChatMessageData {
 
 /**
  * Find all chat messages for a game room
+ * @param gameRoomId - The game room ID
+ * @param limit - Optional limit for number of messages (default: all, recommended: 100, max: 1000)
  */
 export async function findChatMessagesByGameRoom(
-  gameRoomId: number
+  gameRoomId: number,
+  limit?: number
 ): Promise<ChatMessageWithUsername[]> {
+  let query = chatQueries.findByGameRoom;
+  
+  if (limit && limit > 0) {
+    const safeLimit = Math.min(Math.floor(limit), 1000); // Cap at 1000 for safety
+    query += ` LIMIT ${safeLimit}`;
+  }
+  
   const messages = await db.manyOrNone<ChatMessageWithUsername>(
-    chatQueries.findByGameRoom,
+    query,
     [gameRoomId]
   );
   return messages || [];
@@ -49,16 +59,23 @@ export async function createChatMessage(data: CreateChatMessageData): Promise<Ch
 
 /**
  * List all messages for global lobby (where game_room_id is null)
+ * @param limit - Optional limit for number of messages (default: all, recommended: 100, max: 1000)
  */
-export async function list(): Promise<ChatMessageWithUsername[]> {
-  const messages = await db.manyOrNone<ChatMessageWithUsername>(
-    `SELECT cm.*, u.username
+export async function list(limit?: number): Promise<ChatMessageWithUsername[]> {
+  let query = `SELECT cm.*, u.username
      FROM chat_messages cm
      JOIN users u ON cm.user_id = u.id
      WHERE cm.game_room_id IS NULL
-     ORDER BY cm.created_at ASC`
-  );
-  return messages || [];
+     ORDER BY cm.created_at DESC`;
+  
+  if (limit && limit > 0) {
+    const safeLimit = Math.min(Math.floor(limit), 1000); // Cap at 1000 for safety
+    query += ` LIMIT ${safeLimit}`;
+  }
+  
+  const messages = await db.manyOrNone<ChatMessageWithUsername>(query);
+  // Reverse to get chronological order (oldest first)
+  return (messages || []).reverse();
 }
 
 /**
