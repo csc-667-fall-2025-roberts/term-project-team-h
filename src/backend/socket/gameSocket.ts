@@ -14,14 +14,80 @@ import {
     drawCardForPlayer,
     playCard,
     deleteGameRoom,
-    findGameResultByGameRoom,
     findGameResultPlayersByGameResult,
+    findGameRoomById,
+    findGameRoomDecksByPlayer,
+    getTopDiscardCard,
+    findUnoCardById,
+    getCurrentPlayer,
+    findGameResultByGameRoom,
 } from "@backend/db/game"
 
 export interface GameSocket extends Socket {
     userId: number;
     username: string;
     currentGameRoomId?: number;
+}
+
+async function buildGameState(gameId: number) {
+  // Game room & players
+  const gameRoom = await findGameRoomById(gameId);
+  const players = await findGameRoomPlayersByGameRoom(gameId); // with username
+
+  // Who's turn is it?
+  const currentPlayer = await getCurrentPlayer(gameId);
+
+  // Top discard card (deck row) + its UnoCard
+  const topDiscardDeck = await getTopDiscardCard(gameId);
+  let topDiscard: null | {
+    deckCardId: number;
+    cardId: number;
+    color: string;
+    value: string;
+  } = null;
+
+  if (topDiscardDeck) {
+    const card = await findUnoCardById(topDiscardDeck.card_id);
+    if (card) {
+      topDiscard = {
+        deckCardId: topDiscardDeck.id,
+        cardId: card.id,
+        color: card.color,
+        value: card.value,
+      };
+    }
+  }
+
+  const handsByPlayerId: Record<
+    number,
+    { deckCardId: number; cardId: number; color: string; value: string }[]
+  > = {};
+
+  for (const p of players) {
+    const handDecks = await findGameRoomDecksByPlayer(gameId, p.id);
+    handsByPlayerId[p.id] = handDecks.map((d) => ({
+      deckCardId: d.id,
+      cardId: d.card_id,
+      color: (d as any).color,
+      value: (d as any).value,
+    }));
+  }
+
+  return {
+    gameId,
+    status: gameRoom?.status,
+    currentPlayerId: currentPlayer?.id ?? null,
+    currentColor: gameRoom?.current_color ?? null,
+    players: players.map((p) => ({
+      id: p.id,
+      user_id: p.user_id,
+      username: p.username,
+      cards_in_hand: p.cards_in_hand,
+      player_order: p.player_order,
+    })),
+    topDiscard,
+    handsByPlayerId,
+  };
 }
 
 export function initializeGameHandlers(socket: GameSocket, io: Server): void {
@@ -55,51 +121,49 @@ export function initializeGameHandlers(socket: GameSocket, io: Server): void {
   // ---------------------------
 
   socket.on(GAME_DRAW, async ({ gameId }) => {
-
     try {
-        await drawCardForPlayer(gameId, socket.userId);
+      await drawCardForPlayer(gameId, socket.userId);
 
-        io.to(`game:${gameId}`).emit(GAME_STATE, {gameId});
-
-    }catch (err){
-        socket.emit(GAME_ERROR, {message: "Cannot draw card" });
+      const state = await buildGameState(gameId);
+      io.to(`game:${gameId}`).emit(GAME_STATE, state);
+    } catch (err) {
+      console.error("[game] Error drawing card:", err);
+      socket.emit(GAME_ERROR, { message: "Cannot draw card" });
     }
-
   });
 
     // ---------------------------
     // GAME_PLAY
     // ---------------------------
 
-    socket.on(GAME_PLAY, async ({ gameId, deckCardId}) => {
+    socket.on(GAME_PLAY, async ({ gameId, deckCardId, chosenColor }) => {
+      try {
+        console.log(
+          `[game] Player ${socket.username} attempting to play card ${deckCardId} in game ${gameId} (chosenColor=${chosenColor})`
+        );
 
-        try {
-            console.log(`[game] Player ${socket.username} attempting to play card ${deckCardId} in game ${gameId}`);
+        const result = await playCard(gameId, socket.userId, deckCardId, chosenColor);
 
-            const result = await playCard(gameId,socket.userId,deckCardId);
+        if (result?.winnerId) {
+          const gameResult = await findGameResultByGameRoom(gameId);
+          if (gameResult) {
+            const rankings = await findGameResultPlayersByGameResult(gameResult.id);
+            io.to(`game:${gameId}`).emit(GAME_OVER, {
+              winnerId: result.winnerId,
+              rankings: rankings,
+            });
+          }
 
-            if (result?.winnerId){
-
-                const gameResult = await findGameResultByGameRoom(gameId);
-                if (gameResult){
-                    const rankings = await findGameResultPlayersByGameResult(gameResult.id);
-                    io.to(`game:${gameId}`).emit(GAME_OVER, {
-                        winnerId: result.winnerId,
-                        rankings: rankings,
-                    });
-                }
-
-                return;
-            }
-
-            io.to(`game:${gameId}`).emit(GAME_STATE, {gameId});
-
-        }catch (err){
-            console.error("[game] Error playing card:", err);
-            socket.emit(GAME_ERROR, { message: "Invalid card play"});
+          return;
         }
-    });
 
+        const state = await buildGameState(gameId);
+        io.to(`game:${gameId}`).emit(GAME_STATE, state);
+      } catch (err) {
+        console.error("[game] Error playing card:", err);
+        socket.emit(GAME_ERROR, { message: "Invalid card play" });
+      }
+    });
 
     socket.on("game:close", async ({ gameId }) => {
         await deleteGameRoom(gameId);

@@ -25,6 +25,7 @@ export interface GameRoom {
   started_at: Date | null;
   ended_at: Date | null;
   turn_direction: number;
+  current_color: string | null;
 }
 
 export interface CreateGameRoomData {
@@ -33,6 +34,7 @@ export interface CreateGameRoomData {
   password?: string;
   status?: "waiting" | "in_progress" | "finished";
   created_by: number;
+  current_color?: string | null;
 }
 
 // Game Room Player Types
@@ -157,6 +159,7 @@ export async function findGameRoomsByHost(userId: number): Promise<GameRoom[]> {
 }
 
 export async function createGameRoom(data: CreateGameRoomData): Promise<GameRoom> {
+  // NOTE: gameRoomQueries.create should have columns that default current_color to NULL
   const room = await db.one<GameRoom>(
     gameRoomQueries.create,
     [
@@ -176,18 +179,20 @@ export async function updateGameRoom(
     started_at?: Date | null;
     ended_at?: Date | null;
     turn_direction?: number;
+    current_color?: string | null;
   }
 ): Promise<GameRoom | null> {
   const room = await db.oneOrNone<GameRoom>(
     gameRoomQueries.update,
     [
-      data.title,
-      data.max_players,
-      data.password,
-      data.status,
-      data.started_at,
-      data.ended_at,
-      data.turn_direction,
+      data.title ?? null,
+      data.max_players ?? null,
+      data.password ?? null,
+      data.status ?? null,
+      data.started_at ?? null,
+      data.ended_at ?? null,
+      data.turn_direction ?? null,
+      data.current_color ?? null,
       id,
     ]
   );
@@ -318,18 +323,16 @@ export async function findGameRoomDecksByLocation(
   return decks || [];
 }
 
-
 export async function findGameRoomDecksByPlayer(
   gameRoomId: number,
   playerId: number
-): Promise<GameRoomDeck[] > {
+): Promise<GameRoomDeck[]> {
   const decks = await db.manyOrNone<GameRoomDeck>(
     gameRoomDeckQueries.findByPlayer,
     [gameRoomId, playerId]
   );
   return decks || [];
 }
-
 
 export async function createGameRoomDeck(data: CreateGameRoomDeckData): Promise<GameRoomDeck> {
   const deck = await db.one<GameRoomDeck>(
@@ -469,9 +472,9 @@ export async function deleteGameResultPlayersByGameResult(gameResultId: number):
  *  Function for starting the game
  */
 
-export async function startGame(gameRoomId: number){
+export async function startGame(gameRoomId: number) {
   const players = await findGameRoomPlayersByGameRoom(gameRoomId);
-  if (players.length === 0){
+  if (players.length === 0) {
     throw new Error("No players in game room");
   }
 
@@ -498,14 +501,9 @@ export async function startGame(gameRoomId: number){
   const cardsPerPlayer = 7;
   let deckIndex = 0;
 
-  /**
-   *  For each player in players select a random card
-   *  from the deck of cards and assign it to the player
-   *  until each player has 7 random cards
-   */
-
-  for (const player of shuffledPlayers){
-    for (let i = 0;i < cardsPerPlayer; i++){
+  // deal cards
+  for (const player of shuffledPlayers) {
+    for (let i = 0; i < cardsPerPlayer; i++) {
       await createGameRoomDeck({
         game_room_id: gameRoomId,
         card_id: shuffled[deckIndex].id,
@@ -513,37 +511,24 @@ export async function startGame(gameRoomId: number){
         held_by_player_id: player.id,
         position_index: i,
       });
-      deckIndex++
+      deckIndex++;
     }
     await updateGameRoomPlayer(player.id, {
-      cards_in_hand: cardsPerPlayer
+      cards_in_hand: cardsPerPlayer,
     });
   }
 
-  
-
-  /**
-   *  For the remaining cards in the shuffled deck
-   *  place them in the deck of cards that players
-   *  will pull from
-   */
-
-  for (let i=deckIndex + 1; i < shuffled.length;i++){
+  // remaining cards into deck
+  for (let i = deckIndex + 1; i < shuffled.length; i++) {
     await createGameRoomDeck({
-      game_room_id:gameRoomId,
+      game_room_id: gameRoomId,
       card_id: shuffled[i].id,
       location: "deck",
       position_index: i - deckIndex,
     });
   }
 
-  /**
-   *  Add the first discarded card to the discard pile
-   *  this will be the card that the first player will
-   *  try to match with on the very first turn
-   */
-
-  // const firstCard = shuffled[deckIndex];
+  // first discard
   await createGameRoomDeck({
     game_room_id: gameRoomId,
     card_id: shuffled[deckIndex].id,
@@ -551,23 +536,18 @@ export async function startGame(gameRoomId: number){
     position_index: 0,
   });
 
-  /**
-   *  Update game room status from waiting to in progress
-   */
-
-
+  // update game room status
   await updateGameRoom(gameRoomId, {
     status: "in_progress",
     started_at: new Date(),
     turn_direction: 1,
+    current_color: null, // will be set on first play
   });
 
   console.log("[startGame] Game initialized for room", gameRoomId);
 
-  return {message: "Game started successfully"};
-
+  return { message: "Game started successfully" };
 }
-
 
 /**
  *  Function to get the top card in the discard pile
@@ -651,13 +631,13 @@ export async function drawCardForPlayer(
 
   const cardsInHand = await findGameRoomDecksByPlayer(gameRoomId, player.id);
   const nextHandPosition =
-  cardsInHand.length === 0
-    ? 0
-    : Math.max(
-        ...cardsInHand
-          .map(c => c.position_index)
-          .filter((p): p is number => p !== null)
-      ) + 1;
+    cardsInHand.length === 0
+      ? 0
+      : Math.max(
+          ...cardsInHand
+            .map(c => c.position_index)
+            .filter((p): p is number => p !== null)
+        ) + 1;
 
   await updateGameRoomDeck(topCard.id, {
     location: "player_hand",
@@ -665,56 +645,29 @@ export async function drawCardForPlayer(
     position_index: nextHandPosition,
   });
 
+  await updateGameRoomPlayer(player.id, {
+    cards_in_hand: player.cards_in_hand + 1,
+  });
 
-
-  const canPlay = await canPlayCard(gameRoomId, topCard.card_id);
-
-  if (canPlay){
-
-    const discardPile = await findGameRoomDecksByLocation(gameRoomId, "discard");
-    const nextPosition = discardPile.length;
-
-
-    await updateGameRoomDeck(topCard.id, {
-      location: "discard",
-      held_by_player_id: null,
-      position_index: nextPosition,
-    });
-
-
-    await createGameTurn({
-      game_room_id: gameRoomId,
-      player_id: player.id,
-      card_played_id: topCard.card_id,
-      action_type: "play",
-    });
-
-  }else {
-
-    await updateGameRoomPlayer(player.id, {
-      cards_in_hand: player.cards_in_hand + 1
-    });
-
-    await createGameTurn({
-      game_room_id: gameRoomId,
-      player_id: player.id,
-      action_type: "draw",
-    });
-  }
-
-  
+  // Just log the draw
+  await createGameTurn({
+    game_room_id: gameRoomId,
+    player_id: player.id,
+    action_type: "draw",
+  });
 }
 
 /**
  *  Function to play a card
  */
-
 export async function playCard(
   gameRoomId: number,
   userId: number,
-  deckCardId: number
+  deckCardId: number,
+  chosenColor?: string
 ) {
-  console.log("hello");
+  console.log("hello, chosenColor:", chosenColor);
+
   const player = await findGameRoomPlayerByGameRoomAndUser(gameRoomId, userId);
   if (!player) {
     throw new Error("Player not found");
@@ -728,8 +681,6 @@ export async function playCard(
   }
 
   const deckCard = await findGameRoomDeckById(deckCardId);
-  
-
   if (!deckCard) {
     throw new Error("Card not found");
   }
@@ -742,15 +693,39 @@ export async function playCard(
     );
   }
 
+  const unoCard = await findUnoCardById(deckCard.card_id);
+  if (!unoCard) {
+    throw new Error("Card not found");
+  }
 
-  const isValidPlay = await canPlayCard(gameRoomId, deckCard.card_id);
-  if (!isValidPlay) {
-    throw new Error("This card cannot be played! Color or number must match.");
+  const isWild = unoCard.value === "wild";
+  const isWildDrawFour = unoCard.value === "wild_draw_four";
+
+  // Wild / +4 must have a chosen color from the client
+  if ((isWild || isWildDrawFour) && !chosenColor) {
+    throw new Error("You must choose a color for this card.");
+  }
+
+  const normalizedColor = chosenColor
+    ? (chosenColor.toLowerCase() as "red" | "green" | "yellow" | "blue")
+    : undefined;
+
+  // Color that should be in effect after this play
+  const effectiveColor: "red" | "green" | "yellow" | "blue" =
+    isWild || isWildDrawFour
+      ? normalizedColor!
+      : (unoCard.color as "red" | "green" | "yellow" | "blue");
+
+  // Non-wild cards must obey color/number rules
+  if (!isWild && !isWildDrawFour) {
+    const isValidPlay = await canPlayCard(gameRoomId, deckCard.card_id);
+    if (!isValidPlay) {
+      throw new Error("This card cannot be played! Color or number must match.");
+    }
   }
 
   const discardPile = await findGameRoomDecksByLocation(gameRoomId, "discard");
   const nextPosition = discardPile.length;
-  
 
   await updateGameRoomDeck(deckCardId, {
     location: "discard",
@@ -759,24 +734,24 @@ export async function playCard(
   });
 
   await updateGameRoomPlayer(player.id, {
-    cards_in_hand: player.cards_in_hand - 1
+    cards_in_hand: player.cards_in_hand - 1,
   });
 
-  const win = await checkWinCondition(gameRoomId,player.id);
-  if(win){
+  // Set the active color for future plays
+  await updateGameRoom(gameRoomId, {
+    current_color: effectiveColor,
+  });
+
+  const win = await checkWinCondition(gameRoomId, player.id);
+  if (win) {
     console.log("winner");
     return win;
   }
 
+  // ==== SPECIAL CARDS ====
 
-
-  const unoCard = await findUnoCardById(deckCard.card_id);
-  if (!unoCard){
-    throw new Error("Card not found");
-  }
-
-  if (unoCard.value === "draw_two"){
-    const nextPlayer = await getNextPlayer(gameRoomId,player.id);
+  if (unoCard.value === "draw_two") {
+    const nextPlayer = await getNextPlayer(gameRoomId, player.id);
     if (!nextPlayer) throw new Error("Next player not found");
 
     await applyDrawTwo(gameRoomId, nextPlayer.id);
@@ -799,7 +774,7 @@ export async function playCard(
 
   if (unoCard.value === "reverse") {
     const players = await findGameRoomPlayersByGameRoom(gameRoomId);
-    
+
     const gameRoom = await findGameRoomById(gameRoomId);
     if (!gameRoom) {
       throw new Error("Game room not found");
@@ -836,15 +811,13 @@ export async function playCard(
       throw new Error("Skipped player not found");
     }
 
-  
     await createGameTurn({
       game_room_id: gameRoomId,
       player_id: player.id,
       card_played_id: deckCard.card_id,
-      action_type: "play", 
+      action_type: "play",
     });
 
- 
     await createGameTurn({
       game_room_id: gameRoomId,
       player_id: skippedPlayer.id,
@@ -854,18 +827,17 @@ export async function playCard(
     return;
   }
 
-
-  if (unoCard.value === "wild_draw_four"){
+  if (unoCard.value === "wild_draw_four") {
     const nextPlayer = await getNextPlayer(gameRoomId, player.id);
     if (!nextPlayer) throw new Error("Next player not found");
 
-    await applyDrawFour(gameRoomId,nextPlayer.id);
+    await applyDrawFour(gameRoomId, nextPlayer.id);
 
     await createGameTurn({
       game_room_id: gameRoomId,
       player_id: player.id,
       card_played_id: deckCard.card_id,
-      action_type: "wild",
+      action_type: "wild", // keep enum happy
     });
 
     await createGameTurn({
@@ -877,6 +849,16 @@ export async function playCard(
     return;
   }
 
+  // plain wild (if you have it defined separately from wild_draw_four)
+  if (unoCard.value === "wild") {
+    await createGameTurn({
+      game_room_id: gameRoomId,
+      player_id: player.id,
+      card_played_id: deckCard.card_id,
+      action_type: "wild",
+    });
+    return;
+  }
 
   await createGameTurn({
     game_room_id: gameRoomId,
@@ -884,8 +866,6 @@ export async function playCard(
     card_played_id: deckCard.card_id,
     action_type: "play",
   });
-
-
 }
 
 /**
@@ -899,7 +879,10 @@ export async function getCurrentPlayer(
 
   if (!lastTurn) {
     const players = await findGameRoomPlayersByGameRoom(gameRoomId);
-    return players.sort((a, b) => (a.player_order ?? 0) - (b.player_order ?? 0))[0] ?? null;
+    return (
+      players.sort((a, b) => (a.player_order ?? 0) - (b.player_order ?? 0))[0] ??
+      null
+    );
   }
   const lastPlayer = await findGameRoomPlayerById(lastTurn.player_id);
   if (!lastPlayer) return null;
@@ -926,12 +909,11 @@ export async function getNextPlayer(
   const gameRoom = await findGameRoomById(gameRoomId);
   if (!gameRoom) return null;
   const direction = gameRoom.turn_direction;
-  
+
   const nextIndex = (index + direction + ordered.length) % ordered.length;
-  
+
   return ordered[nextIndex];
 }
-
 
 /**
  * Function to validate if a card can be played
@@ -940,41 +922,51 @@ export async function canPlayCard(
   gameRoomId: number,
   cardId: number
 ): Promise<boolean> {
-  // Get the card being played
+  // Card being played
   const playedCard = await findUnoCardById(cardId);
   if (!playedCard) {
     return false;
   }
 
-  // Wild cards can always be played
-  if (playedCard.color === "wild") {
+  // Wilds can always be played
+  if (
+    playedCard.value === "wild" ||
+    playedCard.value === "wild_draw_four" ||
+    playedCard.color === "wild"
+  ) {
     return true;
   }
 
-  // Get the top discard card
+  // Top discard
   const topDiscard = await getTopDiscardCard(gameRoomId);
   if (!topDiscard) {
-    // If no discard card exists, any card can be played
+    // First move: allow any card
     return true;
   }
 
-  // Get the full card info for top discard
   const topDiscardCard = await findUnoCardById(topDiscard.card_id);
   if (!topDiscardCard) {
     return false;
   }
 
-  if (topDiscardCard.color === "wild") {
-    return true;
-  }
+  // Get current active color from the game room, if set
+  const gameRoom = await findGameRoomById(gameRoomId);
+  const activeColor =
+    (gameRoom?.current_color as string | null) ?? topDiscardCard.color;
 
-  // Check if colors match OR values match
-  const colorMatches = playedCard.color === topDiscardCard.color;
+  const colorMatches = playedCard.color === activeColor;
   const valueMatches = playedCard.value === topDiscardCard.value;
+
+  console.log("[canPlayCard]", {
+    played: { color: playedCard.color, value: playedCard.value },
+    top: { color: topDiscardCard.color, value: topDiscardCard.value },
+    activeColor,
+    colorMatches,
+    valueMatches,
+  });
 
   return colorMatches || valueMatches;
 }
-
 
 async function applyDrawTwo(gameRoomId: number, targetPlayerId: number) {
   for (let i = 0; i < 2; i++) {
@@ -996,32 +988,30 @@ async function applyDrawTwo(gameRoomId: number, targetPlayerId: number) {
   }
 }
 
-async function applyDrawFour(gameRoomId: number, targetPlayerId: number){
-    for (let i = 0; i < 4; i++){
-      const card = await drawTopDeckCard(gameRoomId);
-      if (!card) throw new Error("Deck is empty");
+async function applyDrawFour(gameRoomId: number, targetPlayerId: number) {
+  for (let i = 0; i < 4; i++) {
+    const card = await drawTopDeckCard(gameRoomId);
+    if (!card) throw new Error("Deck is empty");
 
-      await updateGameRoomDeck(card.id, {
-        location: "player_hand",
-        held_by_player_id: targetPlayerId,
-        position_index: null,
-      });
+    await updateGameRoomDeck(card.id, {
+      location: "player_hand",
+      held_by_player_id: targetPlayerId,
+      position_index: null,
+    });
+  }
 
-    }
-
-    const targetPlayer = await findGameRoomPlayerById(targetPlayerId);
-    if (targetPlayer){
-      await updateGameRoomPlayer(targetPlayer.id,{
-        cards_in_hand: targetPlayer.cards_in_hand + 4,
-      });
-    }
+  const targetPlayer = await findGameRoomPlayerById(targetPlayerId);
+  if (targetPlayer) {
+    await updateGameRoomPlayer(targetPlayer.id, {
+      cards_in_hand: targetPlayer.cards_in_hand + 4,
+    });
+  }
 }
 
-async function checkWinCondition(gameRoomId: number, playerId: number){
-  
+async function checkWinCondition(gameRoomId: number, playerId: number) {
   const player = await findGameRoomPlayerById(playerId);
 
-  if (!player){
+  if (!player) {
     return null;
   }
 
@@ -1037,13 +1027,13 @@ async function checkWinCondition(gameRoomId: number, playerId: number){
       (a, b) => a.cards_in_hand - b.cards_in_hand
     );
 
-    for (let i = 0; i < sorted.length; i++){
+    for (let i = 0; i < sorted.length; i++) {
       await createGameResultPlayer({
         game_result_id: result.id,
         user_id: sorted[i].user_id,
         rank: i + 1,
         cards_left: sorted[i].cards_in_hand,
-      })
+      });
     }
 
     await updateGameRoom(gameRoomId, {
@@ -1053,10 +1043,7 @@ async function checkWinCondition(gameRoomId: number, playerId: number){
 
     return {
       winnerId: player.user_id,
-    
-    }
-
+    };
   }
   return null;
-
 }
