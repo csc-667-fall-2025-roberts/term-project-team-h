@@ -102,11 +102,22 @@ body {
 .bottom-player-card {
     height: 130px;
     margin: 0px -10px;
+    transition: transform 0.15s ease;
+    transform-origin: bottom center;
 }
 
 .bottom-player-card:hover {
-  height: 180px;
+    animation: hoverEffect 0.8s ease-in-out infinite alternate forwards;
+    transform: scale(1.2);
+    /* transition-duration: 0.2s,0s; */
 }
+
+@keyframes hoverEffect {
+  to {
+    translate: 0px -20px;
+  }
+}
+
 
 .player-name {
   font-family: BarberShop;
