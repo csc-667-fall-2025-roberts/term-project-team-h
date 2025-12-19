@@ -32,6 +32,7 @@ export function initializeGame(): void {
         updateTopDiscard(state);
         updatePlayersMeta(state);
         updateMyHand(state, gameId, socket, myUserId);
+        updateActiveColorIndicator(state);
     });
 
     socket.on(GAME_ERROR, (err) => {
@@ -223,7 +224,7 @@ export function initializeGame(): void {
                 return;
             }
 
-
+            // remove existing card backs for that player and re-create count
             const existingCards = playerDiv.querySelectorAll(`.${cardClass}`);
             existingCards.forEach(card => card.remove());
 
@@ -249,11 +250,10 @@ export function initializeGame(): void {
                     playerDiv.appendChild(img);
                 }
             }
-
         });
     }
 
-    // Re-render MY hand (bottom hand)
+    // Re-render bottom hand
     function updateMyHand(state: any, gameId: number, socket: Socket, myUserId: number) {
         const me = state.players.find((p: any) => Number(p.user_id) === myUserId);
         if (!me) return;
@@ -276,7 +276,9 @@ export function initializeGame(): void {
             img.setAttribute("data-card-id", String(card.deckCardId));
             img.setAttribute("data-value", card.value);
 
-            const colorCap = card.color.charAt(0).toUpperCase() + card.color.slice(1);
+            const colorCap = (card.color && card.color.length > 0)
+                ? card.color.charAt(0).toUpperCase() + card.color.slice(1)
+                : "Wild";
             img.src = `/images/cards/${colorCap}_${card.value}.png`;
 
             bottomDiv.appendChild(img);
@@ -285,22 +287,52 @@ export function initializeGame(): void {
         // Rebind click logic
         wireHandCardClicks(gameId, socket, openColorPicker);
     }
+
+    // Persistent active color indicator: show while top discard is a wild, hide otherwise
+    function updateActiveColorIndicator(state: any) {
+        const indicator = document.getElementById("active-color-indicator");
+        if (!indicator) return;
+
+        // If no top or top is not wild -> hide indicator
+        if (!state.topDiscard || state.topDiscard.color !== "wild") {
+            indicator.classList.add("hidden");
+            indicator.classList.remove("show", "red", "blue", "green", "yellow");
+            indicator.textContent = "";
+            return;
+        }
+
+        // If wild on top, show current color (server-provided)
+        if (!state.currentColor) {
+            // If server hasn't provided currentColor, keep hidden
+            indicator.classList.add("hidden");
+            indicator.textContent = "";
+            return;
+        }
+
+        const color = String(state.currentColor).toLowerCase();
+        indicator.textContent = `Color: ${color.toUpperCase()}`;
+        indicator.className = `active-color show ${color}`;
+        indicator.classList.remove("hidden");
+    }
 }
 
 // ============================================================
-// CLICK HANDLER WIRING FOR HAND CARDS (REUSABLE)
+// CLICK HANDLER FOR HAND CARDS
 // ============================================================
 function wireHandCardClicks(
     gameId: number,
     socket: Socket,
     openColorPicker: (deckCardId: number) => void
 ) {
-    document.querySelectorAll(".bottom-player-card").forEach((card) => {
-        const newCard = card.cloneNode(true) as HTMLElement;
+    // clone to remove old listeners safely then rebind
+    document.querySelectorAll<HTMLImageElement>(".bottom-player-card").forEach((card) => {
+        const newCard = card.cloneNode(true) as HTMLImageElement;
         card.replaceWith(newCard);
 
         newCard.addEventListener("click", () => {
-            const deckCardId = Number(newCard.getAttribute("data-card-id"));
+            const attr = newCard.getAttribute("data-card-id");
+            if (!attr) return;
+            const deckCardId = Number(attr);
             const value = newCard.getAttribute("data-value");
 
             const isWild = value === "wild" || value === "wild_draw_four";

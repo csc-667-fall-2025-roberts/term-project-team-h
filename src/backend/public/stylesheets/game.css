@@ -109,7 +109,6 @@ body {
 .bottom-player-card:hover {
     animation: hoverEffect 0.8s ease-in-out infinite alternate forwards;
     transform: scale(1.2);
-    /* transition-duration: 0.2s,0s; */
 }
 
 @keyframes hoverEffect {
@@ -162,6 +161,41 @@ body {
   margin-bottom: 12px;
 }
 
+.discard-pile {
+  position: relative;
+}
+
+.active-color {
+  position: absolute;
+  top: -36px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 4px 10px;          
+  border-radius: 20px;       
+  font-weight: 600;
+  font-size: 13px;
+  color: white;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.25s ease;
+  z-index: 5;
+
+  white-space: nowrap;       
+  line-height: 1;             
+}
+
+.active-color.show {
+  opacity: 1;
+}
+
+.active-color.red    { background: #e53935; }
+.active-color.blue   { background: #1e88e5; }
+.active-color.green  { background: #43a047; }
+.active-color.yellow { background: #fbc02d; color: black; }
+
+.hidden {
+  display: none;
+}
 
 /*-- CHAT BOX --*/
 #chat-button {
