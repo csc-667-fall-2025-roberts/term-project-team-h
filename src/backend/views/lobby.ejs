@@ -51,9 +51,10 @@
                   <% if (room.currentPlayers >= room.maxPlayers) { %>
                     <button class="join-btn" disabled>Full</button>
                   <% } else { %>
-                    <form
-                      action="/waiting_room/<%= room.id %>/join"
-                      method="POST"
+                    <form 
+                      action="/waiting_room/<%= room.id %>/join" 
+                      method="POST" 
+                      data-room-id="<%= room.id %>"
                     >
                     <button type="submit" class="join-btn">Join</button>
                     </form>
@@ -176,21 +177,27 @@
 
     <!-- Script to toggle create room modal + set fields -->
     <script>
+      // =========================
+      // CREATE ROOM MODAL
+      // =========================
       const openBtn = document.querySelector(".create-room-btn");
-      const modal = document.getElementById("create-room-modal");
+      const createModal = document.getElementById("create-room-modal");
       const closeBtn = document.getElementById("close-modal");
 
-      if (openBtn && modal && closeBtn) {
+      if (openBtn && createModal && closeBtn) {
         openBtn.addEventListener("click", (e) => {
           e.preventDefault();
-          modal.classList.remove("hidden");
+          createModal.classList.remove("hidden");
         });
 
         closeBtn.addEventListener("click", () => {
-          modal.classList.add("hidden");
+          createModal.classList.add("hidden");
         });
       }
 
+      // =========================
+      // MAX PLAYERS PILL BUTTONS
+      // =========================
       const pillButtons = document.querySelectorAll(".pill-button");
       const maxPlayersInput = document.getElementById("maxPlayersInput");
 
@@ -206,37 +213,118 @@
         });
       });
 
+      // =========================
+      // JOIN ROOM PASSWORD MODAL
+      // =========================
       const joinModal = document.getElementById("join-room-modal");
       const joinForm = document.getElementById("join-room-form");
       const joinPasswordInput = document.getElementById("join-room-password");
       const joinCancelBtn = document.getElementById("join-room-cancel");
+      const passwordError = document.querySelector(".password-error");
 
       const lobbyJoinForms = document.querySelectorAll(".lobby-card form");
 
+      function openJoinModal(roomId) {
+        if (!joinForm || !joinModal || !joinPasswordInput) return;
+
+        joinPasswordInput.value = "";
+        passwordError?.classList.add("hidden");
+        if (passwordError) passwordError.textContent = "Incorrect Password";
+
+        joinForm.setAttribute("action", `/waiting_room/${roomId}/join`);
+        joinModal.classList.remove("hidden");
+        joinPasswordInput.focus();
+      }
+
+      function closeJoinModal() {
+        if (!joinModal || !joinPasswordInput) return;
+
+        joinPasswordInput.value = "";
+        passwordError?.classList.add("hidden");
+        joinModal.classList.add("hidden");
+      }
+
+      // If room has password, prevent normal form submit and open modal
       lobbyJoinForms.forEach((form) => {
         form.addEventListener("submit", (e) => {
           const card = form.closest(".lobby-card");
           if (!card) return;
+
           const hasPassword = card.dataset.hasPassword === "true";
           const roomId = card.dataset.roomId;
-          if (!hasPassword || !roomId) return;
+
+          if (!hasPassword || !roomId) return; // non-password rooms submit normally
 
           e.preventDefault();
-          if (joinForm && joinModal && joinPasswordInput) {
-            joinPasswordInput.value = "";
-            joinForm.setAttribute("action", `/waiting_room/${roomId}/join`);
-            joinModal.classList.remove("hidden");
-            joinPasswordInput.focus();
-          }
+          openJoinModal(roomId);
         });
       });
 
-      if (joinCancelBtn && joinModal && joinPasswordInput) {
-        joinCancelBtn.addEventListener("click", () => {
-          joinPasswordInput.value = "";
-          joinModal.classList.add("hidden");
-        });
-      }
+      // Cancel closes modal
+      joinCancelBtn?.addEventListener("click", closeJoinModal);
+
+      // Escape closes modal
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape" && joinModal && !joinModal.classList.contains("hidden")) {
+          closeJoinModal();
+        }
+      });
+
+      // Submit password via fetch so wrong password doesn't reload the page
+      joinForm?.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        if (!joinForm || !joinPasswordInput) return;
+
+        passwordError?.classList.add("hidden");
+
+        const actionUrl = joinForm.getAttribute("action");
+        if (!actionUrl) return;
+
+        const password = joinPasswordInput.value;
+
+        let res;
+        try {
+          res = await fetch(actionUrl, {
+            method: "POST",
+            headers: { "Content-Type": "application/x-www-form-urlencoded" },
+            body: new URLSearchParams({ password }).toString(),
+            credentials: "include",
+          });
+        } catch {
+          if (passwordError) passwordError.textContent = "Network error";
+          passwordError?.classList.remove("hidden");
+          return;
+        }
+
+        // If backend returns JSON with redirect, use it
+        const contentType = res.headers.get("content-type") || "";
+        if (res.ok && contentType.includes("application/json")) {
+          const data = await res.json().catch(() => null);
+          if (data?.ok && data?.redirect) {
+            window.location.href = data.redirect;
+            return;
+          }
+        }
+
+        // If backend redirects or returns OK HTML, just go to waiting room page
+        if (res.ok) {
+          window.location.href = actionUrl.replace(/\/join$/, "");
+          return;
+        }
+
+        // Wrong password (your backend should respond 401/403 here)
+        if (res.status === 401 || res.status === 403) {
+          if (passwordError) passwordError.textContent = "Incorrect Password";
+          passwordError?.classList.remove("hidden");
+          joinPasswordInput.focus();
+          joinPasswordInput.select();
+          return;
+        }
+
+        // Other server error
+        if (passwordError) passwordError.textContent = "Unable to join room";
+        passwordError?.classList.remove("hidden");
+      });
     </script>
 
     <script src="/js/bundle.js"></script>

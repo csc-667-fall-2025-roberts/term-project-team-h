@@ -174,7 +174,6 @@ export function initializeWaitRoomHandlers(socket: WaitRoomSocket, io: Server): 
     try {
       await startGame(roomId);
 
-
       io.to(`waiting-room:${roomId}`).emit(GAME_STARTED,{roomId});
     }catch (err){
       console.error("Error starting game [WAITING_ROOM_START]:",err);
