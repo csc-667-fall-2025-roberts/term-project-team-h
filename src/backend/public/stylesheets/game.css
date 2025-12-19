@@ -389,7 +389,7 @@ body {
 .color-slice:focus-visible {
   filter: brightness(1.15);
   outline: none;
-
+}
 #game-over-overlay {
     position: fixed;
     top: 0;
