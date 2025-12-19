@@ -13,14 +13,15 @@ export const gameRoomQueries = {
   `,
   update: `
     UPDATE game_rooms
-    SET title = COALESCE($1, title),
-        max_players = COALESCE($2, max_players),
-        password = COALESCE($3, password),
-        status = COALESCE($4, status),
-        started_at = COALESCE($5, started_at),
-        ended_at = COALESCE($6, ended_at),
-        turn_direction = COALESCE($7, turn_direction)
-    WHERE id = $8
+    SET title          = COALESCE($1, title),
+        max_players    = COALESCE($2, max_players),
+        password       = COALESCE($3, password),
+        status         = COALESCE($4, status),
+        started_at     = COALESCE($5, started_at),
+        ended_at       = COALESCE($6, ended_at),
+        turn_direction = COALESCE($7, turn_direction),
+        current_color  = COALESCE($8, current_color)
+    WHERE id = $9
     RETURNING *
   `,
   delete: "DELETE FROM game_rooms WHERE id = $1",
