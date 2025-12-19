@@ -67,7 +67,6 @@ export function initializeWaitRoomHandlers(socket: WaitRoomSocket, io: Server): 
     });
   });
 
-
   // ---------------------------
   // WAITING_ROOM_LEAVE
   // ---------------------------

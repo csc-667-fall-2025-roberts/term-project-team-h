@@ -95,7 +95,6 @@ export function initializeGameHandlers(socket: GameSocket, io: Server): void {
   // ---------------------------
   // GAME_JOINED
   // ---------------------------
-
   socket.on(GAME_JOINED, async ({ gameId }) => {
     if (!Number.isFinite(gameId)) {
       socket.emit(GAME_ERROR, { message: "Invalid game ID" });

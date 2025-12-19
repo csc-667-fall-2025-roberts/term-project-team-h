@@ -177,9 +177,7 @@
 
     <!-- Script to toggle create room modal + set fields -->
     <script>
-      // =========================
       // CREATE ROOM MODAL
-      // =========================
       const openBtn = document.querySelector(".create-room-btn");
       const createModal = document.getElementById("create-room-modal");
       const closeBtn = document.getElementById("close-modal");
@@ -195,9 +193,8 @@
         });
       }
 
-      // =========================
+
       // MAX PLAYERS PILL BUTTONS
-      // =========================
       const pillButtons = document.querySelectorAll(".pill-button");
       const maxPlayersInput = document.getElementById("maxPlayersInput");
 
@@ -253,7 +250,7 @@
           const hasPassword = card.dataset.hasPassword === "true";
           const roomId = card.dataset.roomId;
 
-          if (!hasPassword || !roomId) return; // non-password rooms submit normally
+          if (!hasPassword || !roomId) return;
 
           e.preventDefault();
           openJoinModal(roomId);
@@ -270,7 +267,6 @@
         }
       });
 
-      // Submit password via fetch so wrong password doesn't reload the page
       joinForm?.addEventListener("submit", async (e) => {
         e.preventDefault();
         if (!joinForm || !joinPasswordInput) return;
@@ -306,13 +302,13 @@
           }
         }
 
-        // If backend redirects or returns OK HTML, just go to waiting room page
+        // go to waiting room page
         if (res.ok) {
           window.location.href = actionUrl.replace(/\/join$/, "");
           return;
         }
 
-        // Wrong password (your backend should respond 401/403 here)
+        // Wrong password
         if (res.status === 401 || res.status === 403) {
           if (passwordError) passwordError.textContent = "Incorrect Password";
           passwordError?.classList.remove("hidden");
