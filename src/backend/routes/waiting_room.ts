@@ -59,22 +59,61 @@ router.get("/:id", async (req, res, next) => {
 router.post("/:id/join", async (req, res, next) => {
   try {
     if (!req.session || !req.session.user) {
+      // If this came from fetch, return JSON; otherwise redirect.
+      const wantsJSON = req.headers.accept?.includes("application/json");
+      if (wantsJSON) return res.status(401).json({ ok: false, message: "Not logged in" });
       return res.redirect("/login");
     }
 
     const roomId = Number(req.params.id);
     if (!Number.isFinite(roomId)) {
-      return res.status(400).send("Invalid room id");
+      return res.status(400).json({ ok: false, message: "Invalid room id" });
     }
 
-    // Check room password
+    const userId = req.session.user.id;
+
+    // --- Load room (waiting room) ---
     const room = await getWaitingRoom(roomId);
-    if (!room)
-      return res.status(404).send("Room not found");
+    if (!room) {
+      return res.status(404).json({ ok: false, message: "Room not found" });
+    }
+
+    // --- If already in room, allow re-entry even if full ---
+    const inRoom = await isUserInWaitingRoom(roomId, userId);
+    if (inRoom) {
+      if (req.headers.accept?.includes("application/json")) {
+        return res.status(200).json({ ok: true, redirect: `/waiting_room/${roomId}` });
+      }
+      return res.redirect(`/waiting_room/${roomId}`);
+    }
+
+    // capacity check
+    const currentPlayers = await getWaitingRoomPlayers(roomId);
+    const currentCount = currentPlayers.length;
+
+    const maxPlayers = room.maxPlayers;
+    if (Number.isFinite(maxPlayers) && currentCount >= maxPlayers) {
+      if (req.headers.accept?.includes("application/json")) {
+        return res.status(409).json({ ok: false, message: "Room is full" });
+      }
+      return res.status(409).render("lobby", {
+        rooms: await getLobbyRooms(),
+        currentUser: req.session.user,
+        joinError: "Room is full",
+      });
+    }
+
+    // Password check
     const submittedPassword = (req.body.password || "").trim();
 
     if (room.password !== null) {
       if (!submittedPassword || submittedPassword !== room.password) {
+        // Fetch path (your modal)
+        if (req.headers.accept?.includes("application/json")) {
+          return res.status(403).json({ ok: false, message: "Incorrect password" });
+        }
+
+        // Normal submit fallback
         return res.status(403).render("lobby", {
           rooms: await getLobbyRooms(),
           currentUser: req.session.user,
@@ -83,12 +122,12 @@ router.post("/:id/join", async (req, res, next) => {
       }
     }
 
-    const userId = req.session.user.id;
+    // Join
+    await addPlayerToWaitingRoom({ roomId, userId });
 
-    // If they're already in the room, just send them there
-    const inRoom = await isUserInWaitingRoom(roomId, userId);
-    if (!inRoom) {
-      await addPlayerToWaitingRoom({ roomId, userId });
+    // Fetch path
+    if (req.headers.accept?.includes("application/json")) {
+      return res.status(200).json({ ok: true, redirect: `/waiting_room/${roomId}` });
     }
 
     return res.redirect(`/waiting_room/${roomId}`);
@@ -96,5 +135,6 @@ router.post("/:id/join", async (req, res, next) => {
     next(err);
   }
 });
+
 
 export { router as waitingRoomRoutes };
