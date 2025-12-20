@@ -92,17 +92,12 @@ npm run migrate:down
 
 ### Running the Application
 
-For development:
+For localhost:
 
 ```bash
-npm run dev
+npm run start:dev
 ```
 
-For production:
-
-```bash
-npm run build
-npm start
-```
+Visit localhost:3001
 
 ---
